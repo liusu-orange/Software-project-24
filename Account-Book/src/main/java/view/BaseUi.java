@@ -3,11 +3,11 @@ package view;
 public interface BaseUi{
     void BaseWindow();
 
-    void AccountBookWindow();
+    //void AccountBookWindow();
 
-    void ReportFormsWindow();
+    //void ReportFormsWindow();
 
-    void ImportWindow();
+    //void ImportWindow();
 
-    void SettingWindow();
+    //void SettingWindow();
 }

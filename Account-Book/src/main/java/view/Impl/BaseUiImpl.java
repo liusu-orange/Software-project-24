@@ -36,25 +36,6 @@ public class BaseUiImpl implements BaseUi {
         frame.setVisible(true);
     }
 
-    /*
-    private void createSidebar() {
-        sidebar = new JPanel();
-        sidebar.setLayout(new BoxLayout(sidebar, BoxLayout.Y_AXIS));
-        sidebar.setBackground(Color.LIGHT_GRAY);
-
-        for (String label : viewMap.keySet()) {
-            JButton button = new JButton(label);
-            button.setAlignmentX(Component.CENTER_ALIGNMENT);
-            button.setPreferredSize(new Dimension(100, 50));
-            button.addActionListener(new SidebarButtonListener(label));
-            sidebar.add(button);
-            sidebar.add(Box.createVerticalStrut(5));
-        }
-
-        sidebar.add(Box.createVerticalGlue());
-    }
-    */
-
     private void createSidebar() {
         sidebar = new JPanel();
         sidebar.setLayout(new BoxLayout(sidebar, BoxLayout.Y_AXIS));
@@ -94,12 +75,23 @@ public class BaseUiImpl implements BaseUi {
         sidebar.add(Box.createVerticalGlue());
     }
 
-
     private void initViewMap() {
-        viewMap.put("Account Book", this::AccountBookWindow);
-        viewMap.put("Report Forms", this::ReportFormsWindow);
-        viewMap.put("Import", this::ImportWindow);
-        viewMap.put("Setting", this::SettingWindow);
+        viewMap.put("Account Book", () -> {
+            AccountBookUiImpl accountUi = new AccountBookUiImpl(contentPanel);
+            accountUi.AccountBookWindow();
+        });
+        viewMap.put("Report Forms", () -> {
+            ReportFormsUiImpl reportUi = new ReportFormsUiImpl(contentPanel);
+            reportUi.ReportFormsWindow();
+        });
+        viewMap.put("Import", () -> {
+            ImportUiImpl importUi = new ImportUiImpl(contentPanel);
+            importUi.ImportWindow();
+        });
+        viewMap.put("Setting", () -> {
+            SettingUiImpl settingUi = new SettingUiImpl(contentPanel);
+            settingUi.SettingWindow();
+        });
     }
 
     private class SidebarButtonListener implements ActionListener {
@@ -125,28 +117,6 @@ public class BaseUiImpl implements BaseUi {
         }
     }
 
-    // 以下是各个功能界面方法
-    public void AccountBookWindow() {
-        JPanel panel = new JPanel();
-        panel.add(new JLabel("这里是 Account Book 界面"));
-        contentPanel.add(panel, BorderLayout.CENTER);
-    }
 
-    public void ReportFormsWindow() {
-        JPanel panel = new JPanel();
-        panel.add(new JLabel("这里是 Report Forms 界面"));
-        contentPanel.add(panel, BorderLayout.CENTER);
-    }
 
-    public void ImportWindow() {
-        JPanel panel = new JPanel();
-        panel.add(new JLabel("这里是 Import 界面"));
-        contentPanel.add(panel, BorderLayout.CENTER);
-    }
-
-    public void SettingWindow() {
-        JPanel panel = new JPanel();
-        panel.add(new JLabel("这里是 Setting 界面"));
-        contentPanel.add(panel, BorderLayout.CENTER);
-    }
 }

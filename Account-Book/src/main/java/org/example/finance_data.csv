@@ -1,7 +1,9 @@
 Date,Amount,Category,Description
-2025/4/15,50.00,Transportation,Fuel for car at Shell Gas Station
-2025/4/16,30.00,Dining Out,Dinner with friends at Olive Garden
-2025/4/18,15.00,Utilities,Monthly electricity bill payment
-2025/4/23,5.00,Snack,Afternoon snack at convenience store
-2025/4/14,100.00,Shopping,Shopping
-2023/3/21,114.51,Entertainment,i bought a toy
+2025-04-15,50.00,Transportation,Fuel for car at Shell Gas Station
+2025-04-16,30.00,Dining Out,Dinner with friends at Olive Garden
+2025-04-18,15.00,Utilities,Monthly electricity bill payment
+2025-04-23,5.00,Snack,Afternoon snack at convenience store
+2025-04-14,100.00,Shopping,Shopping
+2023-03-21,114.51,Entertainment,i bought a toy
+2025-04-15,100.00,Play,I bought another toy
+2025-04-15,2500.00,Tencent,I bought some beautiful clothes for the game character

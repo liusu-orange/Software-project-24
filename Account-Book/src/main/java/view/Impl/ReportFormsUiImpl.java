@@ -1,10 +1,12 @@
 package view.Impl;
 
+import view.ReportFormsUi;
+
 import javax.swing.*;
 import java.awt.*;
 // import java.awt.event.ActionEvent;
 // import java.awt.event.ActionListener;
-public class ReportFormsUiImpl {
+public class ReportFormsUiImpl implements ReportFormsUi {
     private JPanel contentPanel;
     public ReportFormsUiImpl(JPanel contentPanel) {
         this.contentPanel = contentPanel;

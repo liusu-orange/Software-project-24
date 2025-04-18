@@ -1,91 +1,98 @@
 package view.Impl;
 
+import controller.Impl.*;
+
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
+import java.io.IOException;
 
-public class SettingUiImpl {
+/**
+ * 视图类：设置面板UI，
+ * 实现文件存储路径显示、选择、保存
+ */
+public class SettingUiImpl extends JPanel {
     private JPanel contentPanel;
-    private final ImageIcon accountIcon = new ImageIcon("account_icon.png"); // 替换为实际图标路径
-    private final ImageIcon accountingIcon = new ImageIcon("accounting_icon.png"); // 替换为实际图标路径
-    private final ImageIcon personalizationIcon = new ImageIcon("personalization_icon.png"); // 替换为实际图标路径
-    private final ImageIcon arrowIcon = new ImageIcon("arrow_icon.png"); // 替换为实际图标路径
+    private JTextField pathField;
+    private JButton browseButton;
+    private JButton saveButton;
 
-    public SettingUiImpl(JPanel contentPanel) {
+    private SettingControllerImpl controller;
+
+    public SettingUiImpl(JPanel contentPanel){
         this.contentPanel = contentPanel;
+        this.controller = new SettingControllerImpl();
     }
 
-    public void SettingWindow() {
-        JPanel panel = new JPanel();
-        panel.setLayout(new GridLayout(5, 1)); // 改为5行1列布局
-        panel.setBackground(Color.WHITE);
-
-        // 创建三个类似列表项的面板
-        createListItem(panel, "Account Settings", accountIcon);
-        createListItem(panel, "Accounting Settings", accountingIcon);
-        createListItem(panel, "Personalization", personalizationIcon);
-
-        // 添加两个空白的JPanel来占据最后两行
-        panel.add(new JPanel());
-        panel.add(new JPanel());
-
+    public void SettingWindow(){
         contentPanel.removeAll();
-        contentPanel.add(panel, BorderLayout.CENTER);
-        contentPanel.revalidate();
-        contentPanel.repaint();
+        contentPanel.setLayout(new BorderLayout(10, 10));
+
+        pathField = new JTextField(controller.getCurrentCsvPath());
+        pathField.setEditable(false);
+
+        browseButton = new JButton("浏览...");
+        saveButton = new JButton("保存路径");
+
+        JPanel centerPanel = new JPanel(new BorderLayout(5, 5));
+        centerPanel.add(pathField, BorderLayout.CENTER);
+        centerPanel.add(browseButton, BorderLayout.EAST);
+
+        add(new JLabel("当前CSV路径:"), BorderLayout.NORTH);
+        add(centerPanel, BorderLayout.CENTER);
+        add(saveButton, BorderLayout.SOUTH);
+
+        browseButton.addActionListener(e -> chooseFile());
+        saveButton.addActionListener(e -> savePath());
     }
 
-    private void createListItem(JPanel parentPanel, String label, ImageIcon icon) {
-        JPanel itemPanel = new JPanel();
-        itemPanel.setLayout(new BorderLayout());
-        itemPanel.setBackground(Color.WHITE);
-        itemPanel.setBorder(BorderFactory.createMatteBorder(0, 0, 1, 0, Color.LIGHT_GRAY)); // 底部边框
+//    public SettingUiImpl() {
+//        controller = new SettingControllerImpl();
+//
+//        setLayout(new BorderLayout(10, 10));
+//
+//        pathField = new JTextField(controller.getCurrentCsvPath());
+//        pathField.setEditable(false);
+//
+//        browseButton = new JButton("浏览...");
+//        saveButton = new JButton("保存路径");
+//
+//        JPanel centerPanel = new JPanel(new BorderLayout(5, 5));
+//        centerPanel.add(pathField, BorderLayout.CENTER);
+//        centerPanel.add(browseButton, BorderLayout.EAST);
+//
+//        add(new JLabel("当前CSV路径:"), BorderLayout.NORTH);
+//        add(centerPanel, BorderLayout.CENTER);
+//        add(saveButton, BorderLayout.SOUTH);
+//
+//        browseButton.addActionListener(e -> chooseFile());
+//        saveButton.addActionListener(e -> savePath());
+//    }
 
-        JPanel leftPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
-        leftPanel.add(new JLabel(icon));
-        leftPanel.add(new JLabel(label));
-
-        JPanel rightPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
-        rightPanel.add(new JLabel(arrowIcon));
-
-        itemPanel.add(leftPanel, BorderLayout.WEST);
-        itemPanel.add(rightPanel, BorderLayout.EAST);
-
-        itemPanel.addMouseListener(new java.awt.event.MouseAdapter() {
-            @Override
-            public void mouseClicked(java.awt.event.MouseEvent evt) {
-                contentPanel.removeAll();
-                if (label.equals("Account Settings")) {
-                    showSubContent("这是 Account Settings 界面");
-                } else if (label.equals("Accounting Settings")) {
-                    showSubContent("这是 Accounting Settings 界面");
-                } else if (label.equals("Personalization")) {
-                    showSubContent("这是 Personalization 界面");
-                }
-                contentPanel.revalidate();
-                contentPanel.repaint();
-            }
-        });
-
-        parentPanel.add(itemPanel);
+    private void chooseFile() {
+        JFileChooser chooser = new JFileChooser();
+        if (chooser.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
+            pathField.setText(chooser.getSelectedFile().getPath());
+        }
     }
 
-    private void showSubContent(String message) {
-        JPanel subPanel = new JPanel();
-        subPanel.add(new JLabel(message));
-        // 添加返回按钮
-        JButton backButton = new JButton("返回");
-        backButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                contentPanel.removeAll();
-                SettingWindow();
-                contentPanel.revalidate();
-                contentPanel.repaint();
-            }
-        });
-        subPanel.add(backButton);
-        contentPanel.add(subPanel, BorderLayout.CENTER);
+    private void savePath() {
+        String newPath = pathField.getText();
+        try {
+            controller.updateCsvPath(newPath);
+
+            // 新增：路径保存成功后，立刻刷新 Import 模块（如果已加载）
+            JOptionPane.showMessageDialog(this, "路径保存成功，已立刻生效！");
+
+            /*
+            1.将之前的csv文件与新建的csv文件合并
+            2.（现在的记录显示是直接从文件读取，还是存到类中）
+                重新加载现在的csv
+             */
+            //notifyImportModule();
+
+        } catch (IOException ex) {
+            JOptionPane.showMessageDialog(this, "保存失败: " + ex.getMessage());
+        }
     }
+
 }

@@ -1,29 +1,26 @@
 package view.Impl;
 
+import controller.Impl.ImportControllerImpl;
 import view.ImportUi;
+import model.Entry;
 
-import org.example.CSVImporter;
-import org.example.DeepseekTestMain;
-import org.example.Entry;
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
-import java.awt.event.*;
-import java.io.*;
+import java.awt.event.ActionListener;
 import java.util.List;
 
-public class ImportUiImpl implements ImportUi{
+public class ImportUiImpl implements ImportUi {
     private JPanel contentPanel;
     private JTable table;
     private DefaultTableModel model;
-
-    //WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING 以下路径需调整为个人路径 或新建一个csv文件
-    private static final String CSV_FILE = "D:\\StudySoftware\\java practice\\Integration\\Account-Book\\src\\main\\java\\org\\example\\finance_data.csv";
     private JTextField dateField, amountField, categoryField, descriptionField;
 
+    private ImportControllerImpl controller;
 
     public ImportUiImpl(JPanel contentPanel) {
         this.contentPanel = contentPanel;
+        this.controller = new ImportControllerImpl();
         initializeModel();
     }
 
@@ -40,16 +37,15 @@ public class ImportUiImpl implements ImportUi{
         model.addColumn("Description");
     }
 
+    @Override
     public void ImportWindow() {
         contentPanel.removeAll();
         contentPanel.setLayout(new BorderLayout());
 
-        // 表格初始化
         table = new JTable(model);
         table.setAutoCreateRowSorter(true);
         JScrollPane scrollPane = new JScrollPane(table);
 
-        // 输入面板
         JPanel inputPanel = new JPanel(new GridLayout(4, 2, 5, 5));
         dateField = new JTextField();
         amountField = new JTextField();
@@ -65,9 +61,8 @@ public class ImportUiImpl implements ImportUi{
         inputPanel.add(new JLabel("Description:"));
         inputPanel.add(descriptionField);
 
-        // 功能按钮
         JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 10, 10));
-        String[] btnLabels = {"Add Entry", "Import CSV", "Export CSV", "Delete Entry", "AI Analyze All"};
+        String[] btnLabels = {"Add Entry", "Delete Entry", "Export CSV", "Import CSV", "AI Analyze All"};
         for (String label : btnLabels) {
             JButton btn = new JButton(label);
             btn.addActionListener(createActionListener(label));
@@ -78,30 +73,28 @@ public class ImportUiImpl implements ImportUi{
         contentPanel.add(inputPanel, BorderLayout.NORTH);
         contentPanel.add(buttonPanel, BorderLayout.SOUTH);
 
-        loadCSV();
-        //contentPanel.revalidate();
-        //contentPanel.repaint();
+        List<Entry> initialData = controller.loadEntries();
+        for (Entry e : initialData) {
+            model.addRow(new Object[]{e.getDate(), e.getAmount(), e.getCategory(), e.getDescription()});
+        }
     }
 
     private ActionListener createActionListener(String label) {
         return e -> {
             try {
                 switch (label) {
-                    case "Add Entry":
-                        addEntry();
-                        break;
-                    case "Import CSV":
-                        importCSV();
-                        break;
-                    case "Export CSV":
-                        exportCSV();
-                        break;
-                    case "Delete Entry":
-                        deleteEntry();
-                        break;
-                    case "AI Analyze All":
-                        aiAnalyze();
-                        break;
+                    case "Add Entry" -> addEntry();
+                    case "Delete Entry" -> deleteEntry();
+                    case "Export CSV" -> controller.exportCSV(model, contentPanel);
+                    case "Import CSV" -> {
+                        List<Entry> entries = controller.importCSV(contentPanel);
+                        for (Entry entry : entries) {
+                            model.addRow(new Object[]{entry.getDate(), entry.getAmount(), entry.getCategory(), entry.getDescription()});
+                        }
+                    }
+                    case "AI Analyze All" -> {
+                        controller.analyzeWithAI(model, contentPanel);
+                    }
                 }
             } catch (Exception ex) {
                 JOptionPane.showMessageDialog(contentPanel, "操作失败: " + ex.getMessage());
@@ -111,17 +104,14 @@ public class ImportUiImpl implements ImportUi{
 
     private void addEntry() {
         if (validateInput()) {
-            model.addRow(new Object[]{
+            Entry entry = new Entry(
                     dateField.getText(),
                     Double.parseDouble(amountField.getText()),
                     categoryField.getText(),
                     descriptionField.getText()
-            });
-            String date = dateField.getText();
-            double amount = Double.parseDouble(amountField.getText());
-            String category = categoryField.getText();
-            String description = descriptionField.getText();
-            appendToCSV(date, amount, category, description);
+            );
+            model.addRow(new Object[]{entry.getDate(), entry.getAmount(), entry.getCategory(), entry.getDescription()});
+            controller.addEntry(entry);
             clearFields();
         }
     }
@@ -141,130 +131,11 @@ public class ImportUiImpl implements ImportUi{
         return true;
     }
 
-    private void importCSV() {
-        JFileChooser chooser = new JFileChooser();
-        if (chooser.showOpenDialog(contentPanel) == JFileChooser.APPROVE_OPTION) {
-            CSVImporter importer = new CSVImporter();
-            List<Entry> entries = importer.importCSV(chooser.getSelectedFile().getPath());
-
-            entries.forEach(entry -> model.addRow(new Object[]{
-                    entry.getDate(),
-                    entry.getAmount(),
-                    entry.getCategory(),
-                    entry.getDescription()
-            }));
-            rewriteCSV();
-        }
-    }
-
-    private void aiAnalyze() {
-        new SwingWorker<Void, Void>() {
-            @Override
-            protected Void doInBackground() {
-                try {
-                    DeepseekTestMain ai = new DeepseekTestMain();
-                    for (int i = 0; i < model.getRowCount(); i++) {
-                        String desc = (String) model.getValueAt(i, 3);
-                        String category = ai.classifyDescription(desc);
-                        model.setValueAt(category, i, 2);
-                    }
-                } catch (IOException ex) {
-                    JOptionPane.showMessageDialog(contentPanel, "AI分析失败: " + ex.getMessage());
-                }
-                return null;
-            }
-
-            @Override
-            protected void done() {
-                rewriteCSV();
-            }
-        }.execute();
-    }
-
-    private void loadCSV() {
-        File file = new File(CSV_FILE);
-
-//        System.out.println("调试信息：");
-//        System.out.println("绝对路径: " + file.getAbsolutePath());
-//        System.out.println("是否存在: " + file.exists());
-//        System.out.println("是文件吗: " + file.isFile());
-//        System.out.println("是目录吗: " + file.isDirectory());
-//        System.out.println("可读性: " + file.canRead());
-
-        if (file.exists()) {
-            try (BufferedReader br = new BufferedReader(new FileReader(file))) {
-                String line;
-                // Skip header
-                br.readLine();
-                while ((line = br.readLine()) != null) {
-                    String[] fields = line.split(",");
-                    if (fields.length == 4) {
-                        String date = fields[0];
-                        double amount = Double.parseDouble(fields[1]);
-                        String category = fields[2];
-                        String description = fields[3];
-                        model.addRow(new Object[]{date, amount, category, description});
-                    }
-                }
-            } catch (IOException e) {
-                JOptionPane.showMessageDialog(contentPanel, "加载数据失败");
-            }
-        }
-    }
-
-    private void appendToCSV(String date, double amount, String category, String description) {
-        try (BufferedWriter writer = new BufferedWriter(new FileWriter(CSV_FILE, true))) {
-            writer.write(String.format("%s,%.2f,%s,%s\n", date, amount, category, description));
-        } catch (IOException e) {
-            JOptionPane.showMessageDialog(contentPanel, "\"Error appending data to CSV file.");
-        }
-    }
-
-    private void rewriteCSV() {
-        try (BufferedWriter writer = new BufferedWriter(new FileWriter(CSV_FILE))) {
-            writer.write("Date,Amount,Category,Description\n");
-            for (int i = 0; i < model.getRowCount(); i++) {
-                writer.write(String.format("%s,%.2f,%s,%s\n",
-                        model.getValueAt(i, 0),
-                        (Double) model.getValueAt(i, 1),
-                        model.getValueAt(i, 2),
-                        model.getValueAt(i, 3)
-                ));
-            }
-        } catch (IOException ex) {
-            JOptionPane.showMessageDialog(contentPanel, "更新失败");
-        }
-    }
-
-    private void exportCSV() {
-        JFileChooser chooser = new JFileChooser();
-        if (chooser.showSaveDialog(contentPanel) == JFileChooser.APPROVE_OPTION) {
-            File file = chooser.getSelectedFile();
-            if (!file.getName().toLowerCase().endsWith(".csv")) {
-                file = new File(file.getAbsolutePath() + ".csv");
-            }
-
-            try (BufferedWriter writer = new BufferedWriter(new FileWriter(file))) {
-                writer.write("Date,Amount,Category,Description\n");
-                for (int i = 0; i < model.getRowCount(); i++) {
-                    writer.write(String.format("%s,%.2f,%s,%s\n",
-                            model.getValueAt(i, 0),
-                            (Double) model.getValueAt(i, 1),
-                            model.getValueAt(i, 2),
-                            model.getValueAt(i, 3)
-                    ));
-                }
-            } catch (IOException ex) {
-                JOptionPane.showMessageDialog(contentPanel, "导出失败");
-            }
-        }
-    }
-
     private void deleteEntry() {
         int selectedRow = table.getSelectedRow();
         if (selectedRow != -1) {
             model.removeRow(selectedRow);
-            rewriteCSV();
+            controller.rewriteCSV(model);
         } else {
             JOptionPane.showMessageDialog(contentPanel, "请先选择要删除的行");
         }

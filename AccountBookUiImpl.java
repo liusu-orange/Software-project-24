@@ -17,6 +17,9 @@ public class AccountBookUiImpl {
     private JScrollPane resultScrollPane;
     private JPanel resultPanel;
     private AccountBookControllerImpl controller;
+    // 添加总额显示面板
+    private JPanel totalPanel;
+    private JLabel totalLabel;
 
     // ⚡ 声明为成员变量
     private JFormattedTextField startDateField;
@@ -67,7 +70,16 @@ public class AccountBookUiImpl {
                 endDateField.getText().trim()
         ));
 
-        return panel;
+        totalPanel = new JPanel();
+        totalLabel = new JLabel("本月消费总额：--");
+        totalPanel.add(totalLabel);
+        totalPanel.setBackground(new Color(240, 240, 240));
+
+        JPanel containerPanel = new JPanel(new BorderLayout());
+        containerPanel.add(panel, BorderLayout.NORTH);
+        containerPanel.add(totalPanel, BorderLayout.CENTER);
+
+        return containerPanel;
     }
 
     // ⚡ 增强的日期输入框创建
@@ -173,8 +185,30 @@ public class AccountBookUiImpl {
             data.forEach((date, records) ->
                     resultPanel.add(createDatePanel(date, records)));
         }
+        // 计算总金额
+        double total = data.values().stream()
+                .flatMap(List::stream)
+                .mapToDouble(AccountBookControllerImpl.Record::amount)
+                .sum();
+
+        updateTotalDisplay(total);  // 更新总额显示
+
         resultPanel.revalidate();
         resultScrollPane.repaint();
+    }
+
+    // 添加总额更新方法
+    private void updateTotalDisplay(double total) {
+        String formattedTotal = String.format("¥%.2f", total);
+        String htmlText = "<html><b style='color:#D32F2F; font-size:14px;'>"
+                + "消费总额：</b><span style='font-size:16px;'>%s</span></html>";
+        totalLabel.setText(String.format(htmlText, formattedTotal));
+
+        // 添加动态效果
+        totalPanel.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createMatteBorder(1, 0, 1, 0, new Color(224, 224, 224)),
+                BorderFactory.createEmptyBorder(5, 10, 5, 10)
+        ));
     }
 
     private JPanel createDatePanel(Date date, List<AccountBookControllerImpl.Record> records) {

@@ -2,6 +2,7 @@ package view.Impl;
 
 import controller.Impl.AccountBookControllerImpl;
 import javax.swing.*;
+import javax.swing.border.Border;
 import javax.swing.border.TitledBorder;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
@@ -247,7 +248,34 @@ public class AccountBookUiImpl {
 
         // 动态计算理想高度
         int idealHeight = headerHeight + (Math.min(records.size(), maxVisibleRows) * rowHeight);
-        int minHeight = 80; // 最小面板高度
+        int minHeight = 30; // 最小面板高度
+
+        // ===== 新增标题面板 =====
+        JPanel titlePanel = new JPanel(new BorderLayout());
+        titlePanel.setBackground(new Color(245, 245, 245));
+
+        // 左侧日期标签
+        String dateText = String.format("<html><div style='padding:3px;'>"
+                        + "<b>%s</b> <font color='#666666' size='2'>(%d 条)</font></div></html>",
+                controller.formatDate(date), records.size());
+        JLabel dateLabel = new JLabel(dateText);
+        dateLabel.setBorder(BorderFactory.createEmptyBorder(0, 5, 0, 10));
+
+        // 右侧总计标签
+        double dailyTotal = records.stream()
+                .mapToDouble(AccountBookControllerImpl.Record::amount)
+                .sum();
+        String totalText = String.format("<html><div style='padding:3px;'>"
+                        + "<font color='#D32F2F'>总计：</font>"
+                        + "<font color='black'>¥%.2f</font></div></html>",
+                dailyTotal);
+        JLabel totalLabel = new JLabel(totalText);
+        totalLabel.setHorizontalAlignment(SwingConstants.RIGHT);
+
+        // 组装标题面板
+        titlePanel.add(dateLabel, BorderLayout.WEST);
+        titlePanel.add(totalLabel, BorderLayout.EAST);
+        titlePanel.setBorder(BorderFactory.createMatteBorder(0, 0, 1, 0, new Color(200, 200, 200)));
 
         // ================= 智能表格创建 =================
         JTable table = createSmartTable(records);
@@ -263,22 +291,9 @@ public class AccountBookUiImpl {
 
         // ================= 布局优化 =================
         scrollPane.setPreferredSize(new Dimension(scrollPane.getWidth(), Math.max(idealHeight, minHeight)));
+
+        panel.add(titlePanel, BorderLayout.NORTH);
         panel.add(scrollPane, BorderLayout.CENTER);
-
-        // ================= 智能边框 =================
-        String title = String.format("%s (%d 条)", controller.formatDate(date), records.size());
-        panel.setBorder(BorderFactory.createTitledBorder(
-                BorderFactory.createLineBorder(new Color(200, 200, 200)),
-                title,
-                TitledBorder.LEFT,
-                TitledBorder.TOP,
-                new Font("微软雅黑", Font.BOLD, 12),
-                new Color(100, 100, 100)
-        ));
-
-        // ================= 总计显示优化 =================
-        JLabel totalLabel = createTotalLabel(records);
-        panel.add(totalLabel, BorderLayout.SOUTH);
 
         return panel;
     }

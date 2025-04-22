@@ -1,6 +1,7 @@
 package view.Impl;
 
 import controller.Impl.ImportControllerImpl;
+import controller.Impl.UserControllerImpl;
 import view.ImportUi;
 import model.Entry;
 
@@ -17,10 +18,12 @@ public class ImportUiImpl implements ImportUi {
     private JTextField dateField, amountField, categoryField, descriptionField;
 
     private ImportControllerImpl controller;
+    private UserControllerImpl userController;
 
-    public ImportUiImpl(JPanel contentPanel) {
+    public ImportUiImpl(JPanel contentPanel, UserControllerImpl userController) {
         this.contentPanel = contentPanel;
-        this.controller = new ImportControllerImpl();
+        this.userController = userController; // 初始化UserController
+        this.controller = new ImportControllerImpl(userController); // 传入UserController
         initializeModel();
     }
 
@@ -55,6 +58,15 @@ public class ImportUiImpl implements ImportUi {
 
         table = new JTable(model);
         table.setAutoCreateRowSorter(true);
+
+        // 添加单元格编辑后的自动保存功能
+        table.getModel().addTableModelListener(e -> {
+            if (e.getType() == javax.swing.event.TableModelEvent.UPDATE) {
+                autoSave();
+            }
+        });
+
+
         JScrollPane scrollPane = new JScrollPane(table);
 
         table.getSelectionModel().addListSelectionListener(e -> {

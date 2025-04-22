@@ -1,6 +1,7 @@
 package view.Impl;
 
 import controller.Impl.SettingControllerImpl;
+import controller.Impl.showException;
 
 import javax.swing.*;
 import java.awt.*;
@@ -13,51 +14,45 @@ public class SettingUiImpl {
     private JButton chooseButton;
     private JButton saveButton;
 
+
     public SettingUiImpl(JPanel contentPanel) {
         this.contentPanel = contentPanel;
     }
 
     public void SettingWindow() {
-        // 清空原本的内容
         contentPanel.removeAll();
         contentPanel.setLayout(new BorderLayout());
 
-        // 创建主设置面板
         JPanel settingPanel = createMainSettingPanel();
-
-        // 添加到 contentPanel 中
         contentPanel.add(settingPanel, BorderLayout.CENTER);
         contentPanel.revalidate();
         contentPanel.repaint();
 
-        // 设置按钮事件监听
         setupButtonListeners();
     }
 
     private JPanel createMainSettingPanel() {
         JPanel settingPanel = new JPanel(new BorderLayout());
-        settingPanel.setBorder(BorderFactory.createEmptyBorder(4, 2, 5, 5));
+        settingPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 
-        // 添加文件路径设置组件
+        //顶部
         settingPanel.add(createFilePathPanel(), BorderLayout.NORTH);
-
-        // 这里可以添加其他设置面板
-        // settingPanel.add(createOtherSettingsPanel(), BorderLayout.CENTER);
-
-        // 添加保存按钮
         settingPanel.add(createSaveButtonPanel(), BorderLayout.SOUTH);
 
         return settingPanel;
     }
 
     private JPanel createFilePathPanel() {
-        JPanel pathPanel = new JPanel(new BorderLayout());
-        pathField = new JTextField(SettingControllerImpl.getFinanceFilePath());
+        JPanel pathPanel = new JPanel(new BorderLayout(1, 1));
+        pathField = new JTextField(SettingControllerImpl.getCurrentFinanceDirectory());
         pathField.setEditable(false);
-        chooseButton = new JButton("选择新路径");
+        chooseButton = new JButton("选择新目录");
 
-        pathPanel.add(new JLabel("当前路径: "), BorderLayout.WEST);
-        pathPanel.add(pathField, BorderLayout.CENTER);
+        JPanel labelFieldPanel = new JPanel(new BorderLayout(1, 1));
+        labelFieldPanel.add(new JLabel("当前财务数据存储目录:"), BorderLayout.WEST);
+        labelFieldPanel.add(pathField, BorderLayout.CENTER);
+
+        pathPanel.add(labelFieldPanel, BorderLayout.CENTER);
         pathPanel.add(chooseButton, BorderLayout.EAST);
 
         return pathPanel;
@@ -71,28 +66,39 @@ public class SettingUiImpl {
     }
 
     private void setupButtonListeners() {
-        // 选择路径按钮逻辑
         chooseButton.addActionListener(e -> {
-            JFileChooser fileChooser = new JFileChooser();
-            fileChooser.setDialogTitle("选择新的 finance_data.csv 文件位置");
-            fileChooser.setSelectedFile(new File("finance_data.csv"));
+            JFileChooser dirChooser = new JFileChooser();
+            dirChooser.setDialogTitle("选择财务数据存储目录");
+            dirChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
 
-            int result = fileChooser.showSaveDialog(contentPanel);
+            // Set current directory as the starting point
+            File currentDir = new File(SettingControllerImpl.getCurrentFinanceDirectory());
+            if (currentDir.exists()) {
+                dirChooser.setCurrentDirectory(currentDir);
+            }
+
+            int result = dirChooser.showOpenDialog(contentPanel);
             if (result == JFileChooser.APPROVE_OPTION) {
-                File selectedFile = fileChooser.getSelectedFile();
-                pathField.setText(selectedFile.getAbsolutePath());
+                File selectedDir = dirChooser.getSelectedFile();
+                pathField.setText(selectedDir.getAbsolutePath());
             }
         });
 
-        // 保存按钮逻辑
         saveButton.addActionListener(e -> {
             String newPath = pathField.getText();
-            boolean success = SettingControllerImpl.setFinanceFilePath(newPath);
-            if (success) {
-                JOptionPane.showMessageDialog(contentPanel, "路径保存成功！", "成功", JOptionPane.INFORMATION_MESSAGE);
-            } else {
-                JOptionPane.showMessageDialog(contentPanel, "路径保存失败（可能是相同路径或权限问题）", "失败", JOptionPane.ERROR_MESSAGE);
-                pathField.setText(SettingControllerImpl.getFinanceFilePath());
+            try {
+                SettingControllerImpl.setFinanceFileDirectory(newPath);
+                JOptionPane.showMessageDialog(contentPanel,
+                        "目录设置保存成功！",
+                        "成功",
+                        JOptionPane.INFORMATION_MESSAGE);
+            } catch (showException ex) {
+                JOptionPane.showMessageDialog(contentPanel,
+                        "目录设置保存失败: " + ex.getMessage(),
+                        "错误",
+                        JOptionPane.ERROR_MESSAGE);
+                // Reset to current directory if save fails
+                pathField.setText(SettingControllerImpl.getCurrentFinanceDirectory());
             }
         });
     }

@@ -2,7 +2,8 @@ package controller.Impl;
 
 import model.CSVImporter;
 import model.Entry;
-import test.DeepseekTestClassify;
+import controller.DeepseekClassify;
+import controller.Impl.UserControllerImpl;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
@@ -11,11 +12,23 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class ImportControllerImpl {
-    //要修改文件->resources->config.properties :: csv.file.path=*******
-    private static final String CSV_FILE = SettingControllerImpl.getFinanceFilePath();
+
+    private final UserControllerImpl userController;
+    private String CSV_FILE;
+
+    public ImportControllerImpl(UserControllerImpl userController) {
+        this.userController = userController;
+        updateCsvFilePath();
+    }
+
+    private void updateCsvFilePath() {
+        CSV_FILE = userController.getCurrentUserFinanceFilePath();
+    }
 
     public List<Entry> loadEntries() {
         List<Entry> entries = new ArrayList<>();
+
+        updateCsvFilePath();
         File file = new File(CSV_FILE);
         if (!file.exists()) return entries;
 
@@ -33,6 +46,8 @@ public class ImportControllerImpl {
     }
 
     public void addEntry(Entry entry) {
+
+        updateCsvFilePath();
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(CSV_FILE, true))) {
             writer.write(String.format("%s,%.2f,%s,%s\n",
                     entry.getDate(),
@@ -84,7 +99,7 @@ public class ImportControllerImpl {
             @Override
             protected Void doInBackground() {
                 try {
-                    DeepseekTestClassify ai = new DeepseekTestClassify();
+                    DeepseekClassify ai = new DeepseekClassify();
                     for (int i = 0; i < model.getRowCount(); i++) {
                         String desc = (String) model.getValueAt(i, 3);
                         String category = ai.classifyDescription(desc);
@@ -104,6 +119,8 @@ public class ImportControllerImpl {
     }
 
     public void rewriteCSV(DefaultTableModel model) {
+
+        updateCsvFilePath();
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(CSV_FILE))) {
             writer.write("Date,Amount,Category,Description\n");
 
@@ -123,6 +140,8 @@ public class ImportControllerImpl {
 
 
     public void rewriteCSV(List<Entry> entries) {
+
+        updateCsvFilePath();
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(CSV_FILE))) {
             writer.write("Date,Amount,Category,Description\n");
             for (Entry entry : entries) {

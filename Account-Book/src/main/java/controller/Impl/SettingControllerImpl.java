@@ -1,28 +1,34 @@
 package controller.Impl;
 
 import controller.SettingController;
-
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
 import java.util.Properties;
 
 public class SettingControllerImpl implements SettingController {
-    private static final String CONFIG_FILE = "config.properties";
-    private static final String FINANCE_FILE_PATH_KEY = "finance_file_path";
-    private static final String DEFAULT_DATA_FILE = "finance_data.csv";
-    private static String currentFinanceFilePath;
+    private static final String CONFIG_DIR = "config";
+    private static final String CONFIG_FILE = CONFIG_DIR + File.separator + "config.properties";
+    private static final String FINANCE_FILE_DIR_KEY = "finance_file_directory";
+    private static final String DEFAULT_FINANCE_DIR = "user_finance_data";
+    private static String currentFinanceFileDirectory;
 
     static {
-        initializeApplication(); // 替换原来的loadSettings()
+        try {
+            initializeApplication();
+        } catch (showException e) {
+            // 初始化失败，使用默认值
+            currentFinanceFileDirectory = DEFAULT_FINANCE_DIR;
+            System.err.println("初始化失败: " + e.getMessage());
+        }
     }
 
-    /**
-     * 首次运行时自动初始化所有必要文件
-     */
-    private static void initializeApplication() {
+    private static void initializeApplication() throws showException {
         // 1. 确保配置目录存在
-        new File("config").mkdirs();
+        File configDir = new File(CONFIG_DIR);
+        if (!configDir.exists() && !configDir.mkdirs()) {
+            throw new showException("无法创建配置目录: " + CONFIG_DIR);
+        }
 
         // 2. 初始化配置文件
         File configFile = new File(CONFIG_FILE);
@@ -33,140 +39,100 @@ public class SettingControllerImpl implements SettingController {
         // 3. 加载配置
         loadSettings();
 
-        // 4. 检查数据文件是否存在
-        File dataFile = new File(currentFinanceFilePath);
-        if (!dataFile.exists()) {
-            createDefaultDataFile(dataFile);
-        }
+        // 4. 确保财务数据目录存在
+        new File(currentFinanceFileDirectory).mkdirs();
     }
 
-    /**
-     * 创建默认配置文件
-     */
-    private static void createDefaultConfig(File configFile) {
+    private static void createDefaultConfig(File configFile) throws showException {
         try (OutputStream out = new FileOutputStream(configFile)) {
             Properties props = new Properties();
-            // 设置默认数据文件路径（相对路径）
-            String defaultDataPath = "data" + File.separator + DEFAULT_DATA_FILE;
-            props.setProperty(FINANCE_FILE_PATH_KEY, defaultDataPath);
+            props.setProperty(FINANCE_FILE_DIR_KEY, DEFAULT_FINANCE_DIR);
             props.store(out, "Auto-generated default config");
-
-            // 确保数据目录存在
-            new File("data").mkdirs();
         } catch (IOException e) {
-            System.err.println("无法创建默认配置文件: " + e.getMessage());
+            throw new showException("无法创建默认配置文件: " + e.getMessage(), e);
         }
     }
 
-    /**
-     * 创建默认数据文件
-     */
-    private static void createDefaultDataFile(File targetFile) {
-        try (InputStream in = SettingControllerImpl.class.getClassLoader()
-                .getResourceAsStream(DEFAULT_DATA_FILE)) {
-
-            if (in != null) {
-                Files.copy(in, targetFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
-            } else {
-                // 如果资源中没有模板，创建空文件
-                targetFile.createNewFile();
-            }
-        } catch (IOException e) {
-            System.err.println("无法创建默认数据文件: " + e.getMessage());
-        }
-    }
-
-    // 从配置文件中加载设置
-    private static void loadSettings() {
+    private static void loadSettings() throws showException {
         Properties props = new Properties();
-
-        // 首先尝试从外部文件加载（用于保存用户修改）
         File externalConfig = new File(CONFIG_FILE);
+
         if (externalConfig.exists()) {
             try (FileInputStream in = new FileInputStream(externalConfig)) {
                 props.load(in);
-                currentFinanceFilePath = props.getProperty(FINANCE_FILE_PATH_KEY);
+                currentFinanceFileDirectory = props.getProperty(FINANCE_FILE_DIR_KEY, DEFAULT_FINANCE_DIR);
             } catch (IOException e) {
-                System.err.println("加载外部配置时出错: " + e.getMessage());
+                throw new showException("加载外部配置时出错: " + e.getMessage(), e);
             }
         }
 
-        // 如果外部配置不存在或没有设置路径，使用默认资源
-        if (currentFinanceFilePath == null) {
-            try (InputStream in = SettingControllerImpl.class.getClassLoader()
-                    .getResourceAsStream("config.properties")) {
-                if (in != null) {
-                    props.load(in);
-                    currentFinanceFilePath = props.getProperty(FINANCE_FILE_PATH_KEY,
-                            "finance_data.csv"); // 默认资源路径
-                }
-            } catch (IOException e) {
-                System.err.println("加载内置配置时出错: " + e.getMessage());
-            }
-        }
-
-        // 如果都没有，使用硬编码默认值
-        if (currentFinanceFilePath == null) {
-            currentFinanceFilePath = "finance_data.csv";
+        if (currentFinanceFileDirectory == null) {
+            currentFinanceFileDirectory = DEFAULT_FINANCE_DIR;
         }
     }
 
-    // 将设置保存到配置文件
-    private static void saveSettings() {
+    private static void saveSettings() throws showException {
         Properties props = new Properties();
-        props.setProperty(FINANCE_FILE_PATH_KEY, currentFinanceFilePath);
+        props.setProperty(FINANCE_FILE_DIR_KEY, currentFinanceFileDirectory);
 
-        // 确保保存到外部文件
         try (FileOutputStream out = new FileOutputStream(CONFIG_FILE)) {
             props.store(out, "应用程序设置");
         } catch (IOException e) {
-            System.err.println("保存设置时出错: " + e.getMessage());
+            throw new showException("保存设置时出错: " + e.getMessage(), e);
         }
     }
 
-    public static String getFinanceFilePath() {
-        return currentFinanceFilePath;
+    public static String getFinanceFilePath(String username) {
+        return currentFinanceFileDirectory + File.separator + username + "_finance.csv";
     }
 
-    public static boolean setFinanceFilePath(String newFilePath) {
-        try {
-            // 获取当前文件（从资源或文件系统）
-            InputStream currentInput = null;
-            File currentFile = new File(currentFinanceFilePath);
-            if (currentFile.exists()) {
-                currentInput = new FileInputStream(currentFile);
-            } else {
-                currentInput = SettingControllerImpl.class.getClassLoader()
-                        .getResourceAsStream(currentFinanceFilePath);
-            }
+    public static void setFinanceFileDirectory(String newDirectory) throws showException {
+        File dir = new File(newDirectory);
+        if (!dir.exists() && !dir.mkdirs()) {
+            throw new showException("无法创建目标文件夹: " + newDirectory);
+        }
 
-            if (currentInput == null) {
-                System.err.println("无法找到当前文件: " + currentFinanceFilePath);
-                return false;
-            }
-
-            // 确保新路径是外部文件路径
-            File newFile = new File(newFilePath).getCanonicalFile();
-            File parentDir = newFile.getParentFile();
-            if (!parentDir.exists() && !parentDir.mkdirs()) {
-                System.err.println("无法创建目标文件夹：" + parentDir.getAbsolutePath());
-                return false;
-            }
-
-            try (OutputStream out = new FileOutputStream(newFile)) {
-                byte[] buffer = new byte[1024];
-                int length;
-                while ((length = currentInput.read(buffer)) > 0) {
-                    out.write(buffer, 0, length);
+        // 移动现有用户的财务文件
+        File oldDir = new File(currentFinanceFileDirectory);
+        if (oldDir.exists()) {
+            File[] userFiles = oldDir.listFiles((d, name) -> name.endsWith("_finance.csv"));
+            if (userFiles != null) {
+                for (File file : userFiles) {
+                    try {
+                        Files.move(
+                                file.toPath(),
+                                new File(dir, file.getName()).toPath(),
+                                StandardCopyOption.REPLACE_EXISTING
+                        );
+                    } catch (IOException e) {
+                        throw new showException("移动用户财务文件失败: " + e.getMessage(), e);
+                    }
                 }
-
-                currentFinanceFilePath = newFile.getPath();
-                saveSettings();
-                return true;
             }
-        } catch (IOException e) {
-            System.err.println("操作失败: " + e.getMessage());
-            return false;
+        }
+
+        currentFinanceFileDirectory = newDirectory;
+        saveSettings();
+    }
+
+    public static String getCurrentFinanceDirectory() {
+        return currentFinanceFileDirectory;
+    }
+
+    // 创建用户财务文件（由UserControllerImpl调用）
+    public static void createUserFinanceFile(String username) throws showException {
+        String filePath = getFinanceFilePath(username);
+        File file = new File(filePath);
+        if (!file.exists()) {
+            try {
+                file.createNewFile();
+                // 写入CSV表头
+                try (FileWriter writer = new FileWriter(file)) {
+                    writer.write("Date,Amount,Category,Description\n");
+                }
+            } catch (IOException e) {
+                throw new showException("创建用户账目文件失败: " + e.getMessage(), e);
+            }
         }
     }
 }

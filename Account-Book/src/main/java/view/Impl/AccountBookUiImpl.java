@@ -1,9 +1,9 @@
 package view.Impl;
 
 import controller.Impl.AccountBookControllerImpl;
+import controller.Impl.UserControllerImpl;
+
 import javax.swing.*;
-import javax.swing.border.Border;
-import javax.swing.border.TitledBorder;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableColumn;
@@ -11,7 +11,6 @@ import javax.swing.table.TableColumnModel;
 import java.awt.*;
 import java.io.IOException;
 import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.List;
 import java.util.Map;
@@ -24,9 +23,12 @@ public class AccountBookUiImpl {
     private JPanel contentPanel;
     private JScrollPane resultScrollPane;
     private JPanel resultPanel;
-    private AccountBookControllerImpl controller;
+
     private JPanel totalPanel;
     private JLabel totalLabel;
+
+    private AccountBookControllerImpl controller;
+    private UserControllerImpl userController;
 
     // 日期选择组件
     private JComboBox<Integer> startYearCombo, startMonthCombo, startDayCombo;
@@ -36,9 +38,10 @@ public class AccountBookUiImpl {
      * 构造函数初始化核心组件
      * @param contentPanel 父容器面板
      */
-    public AccountBookUiImpl(JPanel contentPanel) {
+    public AccountBookUiImpl(JPanel contentPanel, UserControllerImpl userController) {
         this.contentPanel = contentPanel;
-        this.controller = new AccountBookControllerImpl();
+        this.userController = userController;
+        this.controller = new AccountBookControllerImpl(userController);
         initializeDateFormat();
     }
 
@@ -187,25 +190,6 @@ public class AccountBookUiImpl {
     }
 
     /**
-     * 自动加载初始数据（默认当月数据）
-     */
-    private void autoLoadInitialData() {
-        try {
-            // 设置开始日期为当月第一天
-            Calendar firstCal = Calendar.getInstance();
-            firstCal.set(Calendar.DAY_OF_MONTH, 1);
-            setDateComponents(startYearCombo, startMonthCombo, startDayCombo, firstCal.getTime());
-
-            // 设置结束日期为当天
-            setDateComponents(endYearCombo, endMonthCombo, endDayCombo, new Date());
-
-            handleSearch(getSelectedDate(true), getSelectedDate(false));
-        } catch (Exception e) {
-            showError("自动加载失败: " + e.getMessage());
-        }
-    }
-
-    /**
      * 设置日期选择器组件值
      * @param yearCombo 年份下拉框
      * @param monthCombo 月份下拉框
@@ -225,23 +209,6 @@ public class AccountBookUiImpl {
         dayCombo.setSelectedItem(cal.get(Calendar.DAY_OF_MONTH));
     }
 
-    /**
-     * 初始化结果面板
-     */
-    private void initializeResultPanel() {
-        resultPanel = new JPanel();
-        resultPanel.setLayout(new BoxLayout(resultPanel, BoxLayout.Y_AXIS));
-        resultScrollPane = new JScrollPane(resultPanel);
-        resultScrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
-    }
-
-    private void addComponent(JPanel panel, Component comp,
-                              GridBagConstraints gbc, int x, int y) {
-        gbc.gridx = x;
-        gbc.gridy = y;
-        panel.add(comp, gbc);
-    }
-    
     /**
      * 处理搜索操作（包含异常处理）
      * @param startInput 起始日期字符串（yyyy-MM-dd）
@@ -267,7 +234,7 @@ public class AccountBookUiImpl {
                     + ex.getMessage().replace("\n", "<br>") + "</html>");
         }
     }
-    
+
     /**
      * 更新结果展示面板（含数据空状态处理）
      * @param data 过滤后的数据集
@@ -438,6 +405,39 @@ public class AccountBookUiImpl {
 
         return table;
 
+    }
+
+    /**
+     * 自动加载初始数据（默认当月数据）
+     */
+    private void autoLoadInitialData() {
+        try {
+            // 设置开始日期为当月第一天
+            Calendar firstCal = Calendar.getInstance();
+            firstCal.set(Calendar.DAY_OF_MONTH, 1);
+            setDateComponents(startYearCombo, startMonthCombo, startDayCombo, firstCal.getTime());
+
+            // 设置结束日期为当天
+            setDateComponents(endYearCombo, endMonthCombo, endDayCombo, new Date());
+
+            handleSearch(getSelectedDate(true), getSelectedDate(false));
+        } catch (Exception e) {
+            showError("自动加载失败: " + e.getMessage());
+        }
+    }
+
+    private void initializeResultPanel() {
+        resultPanel = new JPanel();
+        resultPanel.setLayout(new BoxLayout(resultPanel, BoxLayout.Y_AXIS));
+        resultScrollPane = new JScrollPane(resultPanel);
+        resultScrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
+    }
+
+    private void addComponent(JPanel panel, Component comp,
+                              GridBagConstraints gbc, int x, int y) {
+        gbc.gridx = x;
+        gbc.gridy = y;
+        panel.add(comp, gbc);
     }
 
     /**

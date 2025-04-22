@@ -1,5 +1,6 @@
 package view.Impl;
 
+import controller.Impl.UserControllerImpl;
 import view.BaseUi;
 
 import javax.swing.*;
@@ -10,32 +11,179 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class BaseUiImpl implements BaseUi {
-
+    private JFrame frame;
     private JPanel sidebar;
     private JPanel contentPanel;
     private final Map<String, Runnable> viewMap = new HashMap<>();
-    private Object currentView; // 新增成员变量
-    private final Map<String, Object> viewCache = new HashMap<>(); // 视图缓存
+    private UserControllerImpl userController;
+    private JLabel userStatusLabel;
+
+    public BaseUiImpl() {
+        userController = new UserControllerImpl();
+    }
 
     public void BaseWindow() {
-        JFrame frame = new JFrame("AccountBook");
-        frame.setSize(900, 600);
+        frame = new JFrame("AccountBook");
+        frame.setSize(800, 600);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setLayout(new BorderLayout());
 
         // 初始化映射关系
         initViewMap();
 
+        // 创建顶部状态栏
+        JPanel statusBar = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+        userStatusLabel = new JLabel("未登录");
+        statusBar.add(userStatusLabel);
+        frame.add(statusBar, BorderLayout.NORTH);
+
         // 创建侧边栏和主内容区
         createSidebar();
 
         contentPanel = new JPanel(new BorderLayout());
         contentPanel.setBackground(Color.WHITE);
-        contentPanel.add(new JLabel("默认内容", SwingConstants.CENTER), BorderLayout.CENTER);
+
+        // 默认显示登录界面
+        showLoginView();
 
         frame.add(sidebar, BorderLayout.WEST);
         frame.add(contentPanel, BorderLayout.CENTER);
         frame.setVisible(true);
+    }
+
+    private void showLoginView() {
+        contentPanel.removeAll();
+
+        JPanel loginPanel = new JPanel(new GridBagLayout());
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.insets = new Insets(5, 5, 5, 5);
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+
+        // 用户名
+        gbc.gridx = 0;
+        gbc.gridy = 0;
+        loginPanel.add(new JLabel("用户名:"), gbc);
+
+        gbc.gridx = 1;
+        JTextField usernameField = new JTextField(15);
+        loginPanel.add(usernameField, gbc);
+
+        // 密码
+        gbc.gridx = 0;
+        gbc.gridy = 1;
+        loginPanel.add(new JLabel("密码:"), gbc);
+
+        gbc.gridx = 1;
+        JPasswordField passwordField = new JPasswordField(15);
+        loginPanel.add(passwordField, gbc);
+
+        // 登录按钮
+        gbc.gridx = 0;
+        gbc.gridy = 2;
+        gbc.gridwidth = 2;
+        gbc.fill = GridBagConstraints.CENTER;
+        JButton loginButton = new JButton("登录");
+        loginButton.addActionListener(e -> {
+            String username = usernameField.getText();
+            String password = new String(passwordField.getPassword());
+
+            if (userController.login(username, password)) {
+                userStatusLabel.setText("已登录: " + username);
+                contentPanel.removeAll();
+                contentPanel.add(new JLabel("欢迎使用记账本系统", SwingConstants.CENTER), BorderLayout.CENTER);
+                contentPanel.revalidate();
+                contentPanel.repaint();
+            } else {
+                JOptionPane.showMessageDialog(frame, "用户名或密码错误", "登录失败", JOptionPane.ERROR_MESSAGE);
+            }
+        });
+        loginPanel.add(loginButton, gbc);
+
+        // 注册按钮
+        gbc.gridy = 3;
+        JButton registerButton = new JButton("注册新用户");
+        registerButton.addActionListener(e -> showRegisterView());
+        loginPanel.add(registerButton, gbc);
+
+        contentPanel.add(loginPanel, BorderLayout.CENTER);
+        contentPanel.revalidate();
+        contentPanel.repaint();
+    }
+
+    private void showRegisterView() {
+        contentPanel.removeAll();
+
+        JPanel registerPanel = new JPanel(new GridBagLayout());
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.insets = new Insets(5, 5, 5, 5);
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+
+        // 用户名
+        gbc.gridx = 0;
+        gbc.gridy = 0;
+        registerPanel.add(new JLabel("用户名:"), gbc);
+
+        gbc.gridx = 1;
+        JTextField usernameField = new JTextField(15);
+        registerPanel.add(usernameField, gbc);
+
+        // 密码
+        gbc.gridx = 0;
+        gbc.gridy = 1;
+        registerPanel.add(new JLabel("密码:"), gbc);
+
+        gbc.gridx = 1;
+        JPasswordField passwordField = new JPasswordField(15);
+        registerPanel.add(passwordField, gbc);
+
+        // 性别
+        gbc.gridx = 0;
+        gbc.gridy = 2;
+        registerPanel.add(new JLabel("性别:"), gbc);
+
+        gbc.gridx = 1;
+        JComboBox<String> genderCombo = new JComboBox<>(new String[]{"男", "女"});
+        registerPanel.add(genderCombo, gbc);
+
+        // 年龄
+        gbc.gridx = 0;
+        gbc.gridy = 3;
+        registerPanel.add(new JLabel("年龄:"), gbc);
+
+        gbc.gridx = 1;
+        JSpinner ageSpinner = new JSpinner(new SpinnerNumberModel(18, 1, 120, 1));
+        registerPanel.add(ageSpinner, gbc);
+
+        // 注册按钮
+        gbc.gridx = 0;
+        gbc.gridy = 4;
+        gbc.gridwidth = 2;
+        gbc.fill = GridBagConstraints.CENTER;
+        JButton registerButton = new JButton("注册");
+        registerButton.addActionListener(e -> {
+            String username = usernameField.getText();
+            String password = new String(passwordField.getPassword());
+            boolean gender = genderCombo.getSelectedIndex() == 0; // 0=男, 1=女
+            int age = (Integer) ageSpinner.getValue();
+
+            if (userController.register(username, password, gender, age)) {
+                JOptionPane.showMessageDialog(frame, "注册成功，请登录", "注册成功", JOptionPane.INFORMATION_MESSAGE);
+                showLoginView();
+            } else {
+                JOptionPane.showMessageDialog(frame, "用户名已存在", "注册失败", JOptionPane.ERROR_MESSAGE);
+            }
+        });
+        registerPanel.add(registerButton, gbc);
+
+        // 返回登录按钮
+        gbc.gridy = 5;
+        JButton backButton = new JButton("返回登录");
+        backButton.addActionListener(e -> showLoginView());
+        registerPanel.add(backButton, gbc);
+
+        contentPanel.add(registerPanel, BorderLayout.CENTER);
+        contentPanel.revalidate();
+        contentPanel.repaint();
     }
 
     private void createSidebar() {
@@ -79,23 +227,38 @@ public class BaseUiImpl implements BaseUi {
 
     private void initViewMap() {
         viewMap.put("Account Book", () -> {
-            AccountBookUiImpl accountUi = new AccountBookUiImpl(contentPanel);
+            if (!userController.isLoggedIn()) {
+                JOptionPane.showMessageDialog(frame, "请先登录", "未登录", JOptionPane.WARNING_MESSAGE);
+                showLoginView();
+                return;
+            }
+            AccountBookUiImpl accountUi = new AccountBookUiImpl(contentPanel, userController);
             accountUi.AccountBookWindow();
         });
         viewMap.put("Report Forms", () -> {
+            if (!userController.isLoggedIn()) {
+                JOptionPane.showMessageDialog(frame, "请先登录", "未登录", JOptionPane.WARNING_MESSAGE);
+                showLoginView();
+                return;
+            }
             ReportFormsUiImpl reportUi = new ReportFormsUiImpl(contentPanel);
             reportUi.ReportFormsWindow();
         });
         viewMap.put("Import", () -> {
-            // 使用 computeIfAbsent 保证单例
-            ImportUiImpl importUi = (ImportUiImpl) viewCache.computeIfAbsent(
-                    "Import",
-                    k -> new ImportUiImpl(contentPanel)
-            );
-            this.currentView = importUi; // 更新当前视图
+            if (!userController.isLoggedIn()) {
+                JOptionPane.showMessageDialog(frame, "请先登录", "未登录", JOptionPane.WARNING_MESSAGE);
+                showLoginView();
+                return;
+            }
+            ImportUiImpl importUi = new ImportUiImpl(contentPanel, userController);
             importUi.ImportWindow();
         });
         viewMap.put("Setting", () -> {
+            if (!userController.isLoggedIn()) {
+                JOptionPane.showMessageDialog(frame, "请先登录", "未登录", JOptionPane.WARNING_MESSAGE);
+                showLoginView();
+                return;
+            }
             SettingUiImpl settingUi = new SettingUiImpl(contentPanel);
             settingUi.SettingWindow();
         });
@@ -112,10 +275,6 @@ public class BaseUiImpl implements BaseUi {
         public void actionPerformed(ActionEvent e) {
             contentPanel.removeAll();
 
-            if(currentView instanceof ImportUiImpl) {
-                ((ImportUiImpl)currentView).autoSave();
-            }
-
             Runnable viewFunc = viewMap.get(buttonLabel);
             if (viewFunc != null) {
                 viewFunc.run();
@@ -127,7 +286,4 @@ public class BaseUiImpl implements BaseUi {
             contentPanel.repaint();
         }
     }
-
-
-
 }

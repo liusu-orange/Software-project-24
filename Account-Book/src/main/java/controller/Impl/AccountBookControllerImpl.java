@@ -10,7 +10,7 @@ import java.util.stream.Collectors;
 
 public class AccountBookControllerImpl {
     //注意此文件路径需要修改！！！！！！
-    private static final String CSV_FILE = "D:\\StudySoftware\\java practice\\Newest\\Account-Book\\src\\main\\java\\model\\finance_data.csv";
+    private static final String CSV_FILE = SettingControllerImpl.getFinanceFilePath();
     private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd");
     private static long lastModifiedTime = 0L;
     private static List<Record> cachedRecords = Collections.emptyList();

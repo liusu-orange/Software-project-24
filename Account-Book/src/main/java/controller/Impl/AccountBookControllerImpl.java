@@ -1,5 +1,7 @@
 package controller.Impl;
 
+import javax.swing.*;
+import java.awt.*;
 import java.io.*;
 import java.text.*;
 import java.util.*;
@@ -8,12 +10,28 @@ import java.util.stream.Collectors;
 
 public class AccountBookControllerImpl {
     //注意此文件路径需要修改！！！！！！
-    private static final String CSV_FILE = SettingControllerImpl.getFinanceFilePath();
+    private static final String CSV_FILE = "D:\\StudySoftware\\java practice\\Newest\\Account-Book\\src\\main\\java\\model\\finance_data.csv";
     private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd");
+    private static long lastModifiedTime = 0L;
+    private static List<Record> cachedRecords = Collections.emptyList();
 
     // 初始化日期格式配置
     public AccountBookControllerImpl() {
         initializeDateFormat();
+    }
+
+    public static String[] getDefaultDateRange() {
+        Calendar cal = Calendar.getInstance();
+        cal.set(Calendar.DAY_OF_MONTH, 1);
+        String start = DATE_FORMAT.format(cal.getTime());
+        String end = DATE_FORMAT.format(new Date());
+        return new String[]{start, end};
+    }
+
+    public Date getFirstDayOfMonth() {
+        Calendar cal = Calendar.getInstance();
+        cal.set(Calendar.DAY_OF_MONTH, 1);
+        return cal.getTime();
     }
 
     public void initializeDateFormat() {
@@ -25,8 +43,17 @@ public class AccountBookControllerImpl {
     public Map<Date, List<Record>> searchRecords(String startInput, String endInput)
             throws ParseException, IOException, IllegalArgumentException {
         ProcessedDates dates = processInputDates(startInput, endInput);
-        List<Record> records = CSVUtils.readCSV(CSV_FILE);
-        return filterRecords(records, dates.start(), dates.end());
+        refreshCSVCache();
+        return filterRecords(cachedRecords, dates.start(), dates.end());
+    }
+
+    private void refreshCSVCache() throws IOException {
+        File csvFile = new File(CSV_FILE);
+
+        if (csvFile.lastModified() > lastModifiedTime) {
+            cachedRecords = CSVUtils.readCSV(CSV_FILE);
+            lastModifiedTime = csvFile.lastModified();
+        }
     }
 
     // 日期处理管道
@@ -114,6 +141,7 @@ public class AccountBookControllerImpl {
         static List<Record> readCSV(String path) throws IOException {
             try (BufferedReader br = new BufferedReader(new FileReader(path))) {
                 return br.lines()
+                        .skip(1)
                         .map(String::trim)
                         .filter(line -> !line.isEmpty())
                         .map(CSVUtils::parseLine)
@@ -123,16 +151,22 @@ public class AccountBookControllerImpl {
         }
 
         private static Record parseLine(String line) {
-            String[] values = line.split(",", -1);
-            if (values.length < 4) return null;
-
             try {
+                String[] values = line.split(",", -1);
+                if (values.length < 4) {
+                    throw new IllegalArgumentException("字段数量不足");
+                }
+
+                // 新增有效性校验
+                if (values[0].equalsIgnoreCase("date")) {
+                    return null; // 再次过滤标题行
+                }
+
                 Date date = DATE_FORMAT.parse(values[0].trim());
                 double amount = parseAmount(values[1]);
                 return new Record(date, amount, values[2].trim(), values[3].trim());
             } catch (ParseException | NumberFormatException ex) {
-                System.err.println("CSV解析错误 - 跳过无效记录: " + line);
-                return null;
+                throw new RuntimeException("CSV解析失败，行内容: " + line, ex);
             }
         }
 

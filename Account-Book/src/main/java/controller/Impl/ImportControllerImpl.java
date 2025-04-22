@@ -12,7 +12,7 @@ import java.util.List;
 
 public class ImportControllerImpl {
     //要修改文件->resources->config.properties :: csv.file.path=*******
-    private static final String CSV_FILE = SettingControllerImpl.getFinanceFilePath();
+    private static final String CSV_FILE = "D:\\StudySoftware\\java practice\\MSS\\Account-Book\\src\\main\\resources\\finance_data.csv";
 
     public List<Entry> loadEntries() {
         List<Entry> entries = new ArrayList<>();
@@ -106,17 +106,21 @@ public class ImportControllerImpl {
     public void rewriteCSV(DefaultTableModel model) {
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(CSV_FILE))) {
             writer.write("Date,Amount,Category,Description\n");
+
             for (int i = 0; i < model.getRowCount(); i++) {
-                writer.write(String.format("%s,%.2f,%s,%s\n",
-                        model.getValueAt(i, 0),
-                        (Double) model.getValueAt(i, 1),
-                        model.getValueAt(i, 2),
-                        model.getValueAt(i, 3)));
+                String line = String.join(",",
+                        model.getValueAt(i, 0).toString(),
+                        model.getValueAt(i, 1).toString(),
+                        model.getValueAt(i, 2).toString(),
+                        model.getValueAt(i, 3).toString()
+                );
+                writer.write(line + "\n");
             }
         } catch (IOException ex) {
-            ex.printStackTrace();
+            JOptionPane.showMessageDialog(null, "CSV更新失败: " + ex.getMessage());
         }
     }
+
 
     public void rewriteCSV(List<Entry> entries) {
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(CSV_FILE))) {
@@ -133,4 +137,3 @@ public class ImportControllerImpl {
         }
     }
 }
-

@@ -196,7 +196,7 @@ public class BaseUiImpl implements BaseUi {
         Dimension buttonSize = new Dimension(120, 40);
 
         // 创建侧边栏按钮
-        String[] buttonLabels = {"Account Book", "Report Forms", "Import", "Setting"};
+        String[] buttonLabels = {"Account Book", "Report Forms", "Import", "Setting","AI Analyze"};
         for (String label : buttonLabels) {
             String htmlLabel = label;
             if (label.length() > 20) {
@@ -275,6 +275,15 @@ public class BaseUiImpl implements BaseUi {
             }
             SettingUiImpl settingUi = new SettingUiImpl(contentPanel);
             settingUi.SettingWindow();
+        });
+        viewMap.put("AI Analyze", () -> {
+            if (!userController.isLoggedIn()) {
+                JOptionPane.showMessageDialog(frame, "请先登录", "未登录", JOptionPane.WARNING_MESSAGE);
+                showLoginView();
+                return;
+            }
+            AIAnalyzeUiImpl aiUi = new AIAnalyzeUiImpl(contentPanel, userController);
+            aiUi.AIAnalyzeWindow();
         });
         viewMap.put("Logout", () -> {
             if (userController.isLoggedIn()) {

@@ -75,9 +75,9 @@ public class AccountBookUiImpl {
         JPanel endDatePanel = createDateSelectorPanel(false);
         JButton searchButton = new JButton("Search");
 
-        addComponent(panel, new JLabel("开始日期："), gbc, 0, 0);
+        addComponent(panel, new JLabel("Start date: "), gbc, 0, 0);
         addComponent(panel, startDatePanel, gbc, 1, 0);
-        addComponent(panel, new JLabel("结束日期："), gbc, 2, 0);
+        addComponent(panel, new JLabel("End date: "), gbc, 2, 0);
         addComponent(panel, endDatePanel, gbc, 3, 0);
         addComponent(panel, searchButton, gbc, 4, 0);
 
@@ -87,7 +87,7 @@ public class AccountBookUiImpl {
         ));
 
         totalPanel = new JPanel();
-        totalLabel = new JLabel("本月消费总额：--");
+        totalLabel = new JLabel("Total consumption this month：--");
         totalPanel.add(totalLabel);
         totalPanel.setBackground(new Color(240, 240, 240));
 
@@ -147,11 +147,11 @@ public class AccountBookUiImpl {
         }
 
         panel.add(yearCombo);
-        panel.add(new JLabel("年"));
+        panel.add(new JLabel("Year"));
         panel.add(monthCombo);
-        panel.add(new JLabel("月"));
+        panel.add(new JLabel("Month"));
         panel.add(dayCombo);
-        panel.add(new JLabel("日"));
+        panel.add(new JLabel("Day"));
 
         return panel;
     }
@@ -217,20 +217,20 @@ public class AccountBookUiImpl {
     private void handleSearch(String startInput, String endInput) {
         try {
             if (startInput.isEmpty() || endInput.isEmpty()) {
-                throw new ParseException("日期不能为空", 0);
+                throw new ParseException("The date cannot be empty", 0);
             }
 
             Map<Date, List<AccountBookControllerImpl.Record>> filteredData =
                     controller.searchRecords(startInput, endInput);
             updateResultPanel(filteredData);
         } catch (IOException ex) {
-            showError("<html><b>文件读取失败：</b>" + ex.getMessage()
-                    + "<br>请检查文件路径：</html>");
+            showError("<html><b>File reading failed:</b>" + ex.getMessage()
+                    + "<br>Please check the file path:</html>");
         } catch (RuntimeException ex) { // 捕获新增的运行时异常
-            showError("<html><b>数据解析错误：</b>"
+            showError("<html><b>Data parsing error:</b>"
                     + ex.getCause().getMessage() + "</html>");
         } catch (Exception ex) {
-            showError("<html><b>搜索错误：</b>"
+            showError("<html><b>Search error:</b>"
                     + ex.getMessage().replace("\n", "<br>") + "</html>");
         }
     }
@@ -242,7 +242,7 @@ public class AccountBookUiImpl {
     private void updateResultPanel(Map<Date, List<AccountBookControllerImpl.Record>> data) {
         resultPanel.removeAll();
         if (data.isEmpty()) {
-            resultPanel.add(new JLabel("未找到相关记录"));
+            resultPanel.add(new JLabel("No relevant records were found"));
         } else {
             data.forEach((date, records) ->
                     resultPanel.add(createDatePanel(date, records)));
@@ -293,7 +293,7 @@ public class AccountBookUiImpl {
                 .mapToDouble(AccountBookControllerImpl.Record::amount)
                 .sum();
         String totalText = String.format("<html><div style='padding:3px;'>"
-                        + "<font color='#D32F2F'>总计：</font>"
+                        + "<font color='#D32F2F'>total：</font>"
                         + "<font color='black'>¥%.2f</font></div></html>",
                 dailyTotal);
         JLabel totalLabel = new JLabel(totalText);
@@ -332,7 +332,7 @@ public class AccountBookUiImpl {
      */
     private JTable createSmartTable(List<AccountBookControllerImpl.Record> records) {
         DefaultTableModel model = new DefaultTableModel(
-                new Object[]{"金额 (Amount)", "分类 (Category)", "描述 (Description)"}, 0) {
+                new Object[]{"Amount", "Category", "Description"}, 0) {
             @Override
             public boolean isCellEditable(int row, int column) {
                 return false;
@@ -422,7 +422,7 @@ public class AccountBookUiImpl {
 
             handleSearch(getSelectedDate(true), getSelectedDate(false));
         } catch (Exception e) {
-            showError("自动加载失败: " + e.getMessage());
+            showError("Automatic loading failed: " + e.getMessage());
         }
     }
 
@@ -447,7 +447,7 @@ public class AccountBookUiImpl {
     private void updateTotalDisplay(double total) {
         String formattedTotal = String.format("¥%.2f", total);
         String htmlText = "<html><b style='color:#D32F2F; font-size:14px;'>"
-                + "消费总额：</b><span style='font-size:16px;'>%s</span></html>";
+                + "Total consumption：</b><span style='font-size:16px;'>%s</span></html>";
         totalLabel.setText(String.format(htmlText, formattedTotal));
 
         // 添加动态边框效果
@@ -467,7 +467,7 @@ public class AccountBookUiImpl {
                 .mapToDouble(AccountBookControllerImpl.Record::amount)
                 .sum();
 
-        JLabel label = new JLabel("当日总计: " + String.format("¥%.2f", total));
+        JLabel label = new JLabel("Total for the day: " + String.format("¥%.2f", total));
         label.setHorizontalAlignment(SwingConstants.RIGHT);
         label.setBorder(BorderFactory.createCompoundBorder(
                 BorderFactory.createMatteBorder(1, 0, 0, 0, new Color(200, 200, 200)),
@@ -480,7 +480,7 @@ public class AccountBookUiImpl {
 
     private void showError(String message) {
         JOptionPane.showMessageDialog(contentPanel, message,
-                "系统提示", JOptionPane.ERROR_MESSAGE);
+                "System prompt", JOptionPane.ERROR_MESSAGE);
     }
 
     private void initializeDateFormat() {

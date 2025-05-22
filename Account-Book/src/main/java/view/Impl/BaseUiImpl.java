@@ -244,7 +244,7 @@ private void showLoginView() {
         Dimension buttonSize = new Dimension(120, 40);
 
         // 创建侧边栏按钮
-        String[] buttonLabels = {"Account Book", "Report Forms", "Import", "Setting","AI Analyze"};
+        String[] buttonLabels = {"Account Book", "Report Forms", "Import", "AI Analyze", "Setting"};
         for (String label : buttonLabels) {
             String htmlLabel = label;
             if (label.length() > 20) {
@@ -321,7 +321,7 @@ private void showLoginView() {
                 showLoginView();
                 return;
             }
-            SettingUiImpl settingUi = new SettingUiImpl(contentPanel);
+            SettingUiImpl settingUi = new SettingUiImpl(contentPanel,userController);
             settingUi.SettingWindow();
         });
         viewMap.put("AI Analyze", () -> {

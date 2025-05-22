@@ -166,4 +166,50 @@ public class UserControllerImpl {
         }
         return SettingControllerImpl.getFinanceFilePath(currentUser.getUsername());
     }
+
+    // 修改用户密码
+    public boolean updateUserPassword(String username, String newPassword) {
+        for (UserModel user : users) {
+            if (user.getUsername().equals(username)) {
+                user.setPassword(MD5Util.encrypt(newPassword));
+                saveUsersToFile();
+                return true;
+            }
+        }
+        return false;
+    }
+
+    // 修改用户性别
+    public boolean updateUserGender(String username, boolean newGender) {
+        for (UserModel user : users) {
+            if (user.getUsername().equals(username)) {
+                user.setGender(newGender);
+                saveUsersToFile();
+                return true;
+            }
+        }
+        return false;
+    }
+
+    // 修改用户年龄
+    public boolean updateUserAge(String username, int newAge) {
+        for (UserModel user : users) {
+            if (user.getUsername().equals(username)) {
+                user.setAge(newAge);
+                saveUsersToFile();
+                return true;
+            }
+        }
+        return false;
+    }
+
+    // 删除指定用户名的用户
+    public boolean deleteUser(String username) {
+        boolean removed = users.removeIf(user -> user.getUsername().equals(username));
+        if (removed) {
+            saveUsersToFile();
+        }
+        return removed;
+    }
+
 }

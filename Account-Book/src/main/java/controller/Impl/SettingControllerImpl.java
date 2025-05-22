@@ -13,6 +13,13 @@ public class SettingControllerImpl implements SettingController {
     private static final String DEFAULT_FINANCE_DIR = "user_finance_data";
     private static String currentFinanceFileDirectory;
 
+    private final UserControllerImpl userController;
+    private String CSV_FILE;
+
+    public SettingControllerImpl(UserControllerImpl userController) {
+        this.userController = userController;
+    }
+
     static {
         try {
             initializeApplication();

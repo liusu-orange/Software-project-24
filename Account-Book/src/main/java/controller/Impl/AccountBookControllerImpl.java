@@ -1,5 +1,7 @@
 package controller.Impl;
 
+import controller.AccountBookController;
+
 import java.io.*;
 import java.text.*;
 import java.util.*;
@@ -18,7 +20,7 @@ import java.util.stream.Collectors;
  * @version 1.1.0
  * @since v1.0.0
  */
-public class AccountBookControllerImpl {
+public class AccountBookControllerImpl implements AccountBookController {
 
     private final UserControllerImpl userController;
     private String CSV_FILE;

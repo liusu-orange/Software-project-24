@@ -8,21 +8,33 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-
+/**
+ * UI implementation for AI financial analysis, providing an interface to generate and view AI-driven budget reports.
+ *
+ * @author Haoming Lei
+ * @version 1.0.0
+ * @since v1.0.0
+ */
 public class AIAnalyzeUiImpl implements AIAnalyzeUi {
     private JPanel contentPanel;
     private UserControllerImpl userController;
     private JTextArea resultTextArea; // 显示分析结果的文本域
     private JLabel statusLabel;       // 状态提示标签
     private AIAnalyzeControllerImpl aiController; // 分析控制器
-
+    /**
+     * Initializes the AI analysis UI with necessary dependencies.
+     * @param contentPanel Parent container panel
+     * @param userController User controller instance for authentication
+     */
     public AIAnalyzeUiImpl(JPanel contentPanel, UserControllerImpl userController) {
         this.contentPanel = contentPanel;
         this.userController = userController;
         // 初始化分析控制器（需传入 userController）
         this.aiController = new AIAnalyzeControllerImpl(userController);
     }
-
+    /**
+     * Constructs and displays the AI analysis window with result area and analysis button.
+     */
     @Override
     public void AIAnalyzeWindow() {
         contentPanel.removeAll();

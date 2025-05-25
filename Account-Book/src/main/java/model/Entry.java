@@ -1,5 +1,11 @@
 package model;
-
+/**
+ * Represents a financial entry with date, amount, category, and description.
+ *
+ * @author Yi Zhong
+ * @version 1.0.0
+ * @since v1.0.0
+ */
 public class Entry {
     private String date;
     private double amount;

@@ -11,21 +11,38 @@ import javax.net.ssl.*;
 import controller.Impl.UserControllerImpl;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
+/**
+ * AI Financial Analysis Controller that generates budget reports using the DeepSeek API.
+ * @author Yi Zhong
+ * @version 1.0.0
+ * @since v1.0.0
+ */
 public class AIAnalyzeControllerImpl {
     private static final String DEEPSEEK_API_URL_COMPLETIONS = "https://api.deepseek.com/chat/completions";
     private static final String DEEPSEEK_API_KEY = "sk-941ce5cde31c41cfaf9c5b7f4789b044"; // 替换为你的API Key
 
     private final UserControllerImpl userController;
     public String CSV_FILE;
-
+    /**
+     * Initializes the AI analysis controller with the user's financial data path.
+     * @param userController Instance of UserController to retrieve the CSV file path
+     */
     public AIAnalyzeControllerImpl(UserControllerImpl userController) {
         this.userController = userController;
         updateCsvFilePath();
     }
-
+    /**
+     * Updates the user's financial data file path.
+     */
     private void updateCsvFilePath() {
         CSV_FILE = userController.getCurrentUserFinanceFilePath();
     }
+    /**
+     * Analyzes CSV financial data and generates AI budget suggestions.
+     * @param csvFilePath Path to the CSV file (format: date,amount,category[,description])
+     * @return String containing monthly expense summaries and AI-generated suggestions
+     * @throws IOException Thrown on file read or network request failures
+     */
     public String analyzeBudgetWithDeepSeek(String csvFilePath) throws IOException {
         StringBuilder result = new StringBuilder();
         // 使用 TreeMap 确保按月份顺序排序
@@ -85,11 +102,21 @@ public class AIAnalyzeControllerImpl {
 
         return result.toString();
     }
-
+    /**
+     * Calculates the total expenses for given category expenses.
+     * @param categoryExpenses Map of category to expense amounts
+     * @return Total expense amount
+     */
     private double getTotalExpenses(Map<String, Double> categoryExpenses) {
         return categoryExpenses.values().stream().mapToDouble(Double::doubleValue).sum();
     }
-
+    /**
+     * Calls the DeepSeek API to get budget suggestions.
+     * @param categoryExpenses Category-wise expense data
+     * @param month Month in "yyyy/MM" format
+     * @return English text of AI-generated budget suggestions
+     * @throws IOException Thrown on API request failures
+     */
     private String getBudgetSuggestionsFromDeepSeek(Map<String, Double> categoryExpenses, String month) throws IOException {
         StringBuilder description = new StringBuilder();
 
@@ -165,7 +192,11 @@ public class AIAnalyzeControllerImpl {
         JSONObject item = JSONObject.fromObject(JSONObject.fromObject(choices.get(0)).get("message"));
         return item.getString("content");
     }
-
+    /**
+     * Trusts all SSL certificates (for bypassing certificate validation).
+     * @param connection HTTPS connection instance
+     * @return Original SSLSocketFactory
+     */
     private SSLSocketFactory trustAllHosts(HttpsURLConnection connection) {
         SSLSocketFactory oldFactory = connection.getSSLSocketFactory();
         try {
@@ -178,7 +209,9 @@ public class AIAnalyzeControllerImpl {
         }
         return oldFactory;
     }
-
+    /**
+     * Custom trust manager for ignoring certificate validation.
+     */
     private TrustManager[] trustAllCerts = new TrustManager[]{new X509TrustManager() {
         public java.security.cert.X509Certificate[] getAcceptedIssuers() {
             return new java.security.cert.X509Certificate[]{};
@@ -190,7 +223,9 @@ public class AIAnalyzeControllerImpl {
         public void checkServerTrusted(X509Certificate[] chain, String authType) throws CertificateException {
         }
     }};
-
+    /**
+     * Hostname verifier that always returns true.
+     */
     private HostnameVerifier DO_NOT_VERIFY = new HostnameVerifier() {
         public boolean verify(String hostname, SSLSession session) {
             return true;

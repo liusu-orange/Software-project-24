@@ -9,7 +9,13 @@ import model.UserModel;
 import javax.swing.*;
 import java.awt.*;
 import java.io.File;
-
+/**
+ * UI implementation for application settings, including financial data directory management and user profile editing.
+ *
+ * @author Boliang Chen
+ * @version 1.0.0
+ * @since v1.0.0
+ */
 public class SettingUiImpl {
 
     private final JPanel contentPanel;
@@ -24,13 +30,19 @@ public class SettingUiImpl {
 
     private SettingControllerImpl controller;
     private UserControllerImpl userController;
-
+    /**
+     * Initializes the settings UI with user controller and configuration logic.
+     * @param contentPanel Parent container panel
+     * @param userController User controller instance for authentication
+     */
     public SettingUiImpl(JPanel contentPanel, UserControllerImpl userController) {
         this.contentPanel = contentPanel;
         this.userController = userController;
         this.controller = new SettingControllerImpl(userController);
     }
-
+    /**
+     * Displays the settings window with directory selection and user profile fields.
+     */
     public void SettingWindow() {
         contentPanel.removeAll();
         contentPanel.setLayout(new BorderLayout());
@@ -68,7 +80,10 @@ public class SettingUiImpl {
     }
 
 
-
+    /**
+     * Creates the financial data directory selection panel.
+     * @return Configured directory path panel
+     */
     // 创建文件路径面板
     private JPanel createFilePathPanel() {
         JPanel pathPanel = new JPanel(new BorderLayout(1, 1));
@@ -85,7 +100,10 @@ public class SettingUiImpl {
 
         return pathPanel;
     }
-
+    /**
+     * Creates the user profile settings panel (password, gender, age).
+     * @return Configured user info panel
+     */
     // 创建用户信息设置面板（密码、性别、年龄）
     private JPanel createUserSettingPanel() {
         JPanel userPanel = new JPanel(new GridBagLayout());
@@ -147,14 +165,19 @@ public class SettingUiImpl {
         return userPanel;
     }
 
-
+    /**
+     * Creates the save button panel for applying settings.
+     * @return Panel containing the save button
+     */
     private JPanel createSaveButtonPanel() {
         JPanel bottomPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
         saveButton = new JButton("Save settings");
         bottomPanel.add(saveButton);
         return bottomPanel;
     }
-
+    /**
+     * Sets up action listeners for directory selection and save operations.
+     */
     private void setupButtonListeners() {
         chooseButton.addActionListener(e -> {
             JFileChooser dirChooser = new JFileChooser();

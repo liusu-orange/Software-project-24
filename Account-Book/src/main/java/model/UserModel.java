@@ -1,11 +1,23 @@
 package model;
-
+/**
+ * Data model representing a user with authentication and profile details.
+ *
+ * @author Boliang Chen
+ * @version 1.0.0
+ * @since v1.0.0
+ */
 public class UserModel {
     private String username;
     private String password;
     private boolean gender;
     private int age;
-
+    /**
+     * Creates a user model with full details.
+     * @param username Unique user identifier
+     * @param password Encrypted or plain-text password (depends on context)
+     * @param gender User's gender
+     * @param age User's age
+     */
     public UserModel(String username, String password, boolean gender, int age) {
         this.username = username;
         this.password = password;
@@ -17,64 +29,64 @@ public class UserModel {
     }
 
     /**
-     * 获取
-     * @return username
+     * Gets the user's unique username.
+     * @return Username string
      */
     public String getUsername() {
         return username;
     }
 
     /**
-     * 设置
-     * @param username
+     * Sets the user's unique username.
+     * @param username New username
      */
     public void setUsername(String username) {
         this.username = username;
     }
 
     /**
-     * 获取
-     * @return password
+     * Gets the user's password.
+     * @return Password string
      */
     public String getPassword() {
         return password;
     }
 
     /**
-     * 设置
-     * @param password
+     * Sets the user's password.
+     * @param password New password string
      */
     public void setPassword(String password) {
         this.password = password;
     }
 
     /**
-     * 获取
-     * @return gender
+     * Gets the user's gender.
+     * @return Gender flag (true/false)
      */
     public boolean isGender() {
         return gender;
     }
 
     /**
-     * 设置
-     * @param gender
+     * Sets the user's gender.
+     * @param gender New gender flag (true/false)
      */
     public void setGender(boolean gender) {
         this.gender = gender;
     }
 
     /**
-     * 获取
-     * @return age
+     * Gets the user's age.
+     * @return Age as integer
      */
     public int getAge() {
         return age;
     }
 
     /**
-     * 设置
-     * @param age
+     * Sets the user's age.
+     * @param age New age value
      */
     public void setAge(int age) {
         this.age = age;

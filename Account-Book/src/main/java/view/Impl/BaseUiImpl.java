@@ -10,7 +10,13 @@ import java.awt.event.ActionListener;
 import java.awt.image.BufferedImage;
 import java.util.HashMap;
 import java.util.Map;
-
+/**
+ * Base UI implementation for the account book application, providing core navigation and authentication views.
+ *
+ * @author Boliang Chen Haoming Lei
+ * @version 1.2.0
+ * @since v1.0.0
+ */
 public class BaseUiImpl implements BaseUi {
     private JFrame frame;
     private JPanel sidebar;
@@ -18,11 +24,15 @@ public class BaseUiImpl implements BaseUi {
     private final Map<String, Runnable> viewMap = new HashMap<>();
     private UserControllerImpl userController;
     private JLabel userStatusLabel;
-
+    /**
+     * Initializes the base UI with user authentication logic.
+     */
     public BaseUiImpl() {
         userController = new UserControllerImpl();
     }
-
+    /**
+     * Displays the main application window with login, registration, and sidebar navigation.
+     */
     public void BaseWindow() {
         frame = new JFrame("AccountBook");
         frame.setSize(800, 600);
@@ -51,7 +61,9 @@ public class BaseUiImpl implements BaseUi {
         frame.add(contentPanel, BorderLayout.CENTER);
         frame.setVisible(true);
     }
-
+    /**
+     * Shows the login view with username/password input and authentication logic.
+     */
 private void showLoginView() {
     contentPanel.removeAll();
 
@@ -168,7 +180,9 @@ private void showLoginView() {
     contentPanel.revalidate();
     contentPanel.repaint();
 }
-
+    /**
+     * Shows the user registration view with form validation and account creation.
+     */
     private void showRegisterView() {
         contentPanel.removeAll();
 
@@ -244,8 +258,9 @@ private void showLoginView() {
         contentPanel.revalidate();
         contentPanel.repaint();
     }
-
-    //侧边栏
+    /**
+     * Creates the sidebar navigation panel with view buttons (Account Book, Reports, etc.).
+     */
     private void createSidebar() {
         sidebar = new JPanel();
         sidebar.setLayout(new BoxLayout(sidebar, BoxLayout.Y_AXIS));
@@ -297,7 +312,9 @@ private void showLoginView() {
 
         sidebar.add(logoutButton);
     }
-
+    /**
+     * Initializes view mappings for sidebar buttons to corresponding UI components.
+     */
     private void initViewMap() {
         viewMap.put("Account Book", () -> {
             if (!userController.isLoggedIn()) {
@@ -352,17 +369,22 @@ private void showLoginView() {
             } else {
                 JOptionPane.showMessageDialog(frame, "Not logged in currently", "Hint", JOptionPane.WARNING_MESSAGE);
             }
-            showLoginView(); // 无论是否已登录，点击登出都回到登录界面
+            showLoginView();
         });
     }
-
+    /**
+     * Listener for sidebar buttons to switch between different application views.
+     */
     private class SidebarButtonListener implements ActionListener {
         private final String buttonLabel;
 
         public SidebarButtonListener(String label) {
             this.buttonLabel = label;
         }
-
+        /**
+         * Handles view switching based on the clicked sidebar button.
+         * @param e Action event triggered by button click
+         */
         @Override
         public void actionPerformed(ActionEvent e) {
             contentPanel.removeAll();

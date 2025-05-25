@@ -24,24 +24,60 @@ public class ImportControllerImpl {
         CSV_FILE = userController.getCurrentUserFinanceFilePath();
     }
 
-    public List<Entry> loadEntries() {
-        updateCsvFilePath();
-        List<Entry> entries = new ArrayList<>();
-        File file = new File(CSV_FILE);
-        if (!file.exists()) return entries;
+//    public List<Entry> loadEntries() {
+//        List<Entry> entries = new ArrayList<>();
+//
+//        updateCsvFilePath();
+//        File file = new File(CSV_FILE);
+//        if (!file.exists()) return entries;
+//
+//        try (BufferedReader br = new BufferedReader(new FileReader(file))) {
+//            br.readLine(); // 跳过表头
+//            String line;
+//            while ((line = br.readLine()) != null) {
+//                String[] fields = line.split(",");
+//                if (fields.length == 4) {
+//                    entries.add(new Entry(fields[0], Double.parseDouble(fields[1]), fields[2], fields[3]));
+//                }
+//            }
+//        } catch (IOException ignored) {}
+//        return entries;
+//    }
+public List<Entry> loadEntries() {
+    List<Entry> entries = new ArrayList<>();
+    updateCsvFilePath();
+    File file = new File(CSV_FILE);
 
-        try (BufferedReader br = new BufferedReader(new FileReader(file))) {
-            br.readLine(); // 跳过表头
-            String line;
-            while ((line = br.readLine()) != null) {
-                String[] fields = line.split(",");
-                if (fields.length == 4) {
-                    entries.add(new Entry(fields[0], Double.parseDouble(fields[1]), fields[2], fields[3]));
+    if (!file.exists() || file.length() == 0) {
+        return entries; // 空文件直接返回空列表
+    }
+
+    try (BufferedReader br = new BufferedReader(new FileReader(file))) {
+        br.readLine(); // 跳过表头
+        String line;
+        while ((line = br.readLine()) != null) {
+            line = line.trim();
+            if (line.isEmpty()) continue;
+
+            String[] fields = line.split(",");
+            if (fields.length == 4) {
+                try {
+                    entries.add(new Entry(
+                            fields[0],
+                            Double.parseDouble(fields[1]),
+                            fields[2],
+                            fields[3]
+                    ));
+                } catch (NumberFormatException e) {
+                    System.err.println("跳过无效数据行: " + line);
                 }
             }
-        } catch (IOException ignored) {}
-        return entries;
+        }
+    } catch (IOException e) {
+        e.printStackTrace();
     }
+    return entries;
+}
 
     public void addEntry(Entry entry) {
 

@@ -14,7 +14,7 @@ import java.util.List;
 public class ImportUiImpl implements ImportUi {
     private JPanel contentPanel;
     private JTable table;
-    public DefaultTableModel model;
+    private DefaultTableModel model;
     private JTextField dateField, amountField, categoryField, descriptionField;
 
     private ImportControllerImpl controller;
@@ -27,6 +27,29 @@ public class ImportUiImpl implements ImportUi {
         initializeModel();
     }
 
+//    private void initializeModel() {
+//        if (sharedModel == null) {
+//            sharedModel = new DefaultTableModel(new Object[]{"Date", "Amount", "Category", "Description"}, 0) {
+//                @Override
+//                public Class<?> getColumnClass(int column) {
+//                    return column == 1 ? Double.class : String.class;
+//                }
+//            };
+//
+//            // 添加空行保护逻辑
+//            List<Entry> initialData = controller.loadEntries();
+//            if (!initialData.isEmpty()) {
+//                for (Entry e : initialData) {
+//                    sharedModel.addRow(new Object[]{e.getDate(), e.getAmount(),
+//                            e.getCategory(), e.getDescription()});
+//                }
+//            } else {
+//                // 添加默认空行防止异常
+//                sharedModel.addRow(new Object[]{"", 0, "", ""});
+//            }
+//        }
+//        this.model = sharedModel;
+//    }
 private void initializeModel() {
     if (sharedModel == null) {
         sharedModel = new DefaultTableModel(new Object[]{"Date", "Amount", "Category", "Description"}, 0) {
@@ -199,7 +222,7 @@ private void initializeModel() {
         }
     }
 
-    private DefaultTableModel sharedModel;
+    private static DefaultTableModel sharedModel;
 
     private void clearFields() {
         dateField.setText("");

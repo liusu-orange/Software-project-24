@@ -9,7 +9,13 @@ import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.List;
-
+/**
+ * User controller for managing user authentication, registration, and profile settings.
+ *
+ * @author Boliang Chen
+ * @version 1.0.0
+ * @since v1.0.0
+ */
 public class UserControllerImpl {
     private static final String USER_FILE = "user.csv";
     private static final String DEFAULT_USERNAME = "testUser";
@@ -17,7 +23,10 @@ public class UserControllerImpl {
     private static final String DEFAULT_FINANCE_FILE = "/testUser_finance.csv";
     private List<UserModel> users;
     private UserModel currentUser;
-
+    /**
+     * Initializes the user controller and loads user data from file.
+     * Creates default admin user if no users exist.
+     */
     public UserControllerImpl() {
         this.users = new ArrayList<>();
         this.currentUser = null;
@@ -98,7 +107,14 @@ public class UserControllerImpl {
             e.printStackTrace();
         }
     }
-
+    /**
+     * Registers a new user with encrypted password and creates their finance file.
+     * @param username Unique user identifier
+     * @param password Clear-text password (auto-encrypted via MD5)
+     * @param gender User's gender
+     * @param age User's age
+     * @return True if registration succeeds, false if username exists or file creation fails
+     */
     // 用户注册
     public boolean register(String username, String password, boolean gender, int age) {
         // 检查用户名是否已存在
@@ -126,7 +142,12 @@ public class UserControllerImpl {
         }
         return true;
     }
-
+    /**
+     * Logs in a user with username and password.
+     * @param username User identifier
+     * @param password Clear-text password (auto-encrypted for validation)
+     * @return True if credentials are valid, false otherwise
+     */
     // 用户登录
     public boolean login(String username, String password) {
         for (UserModel user : users) {
@@ -138,27 +159,41 @@ public class UserControllerImpl {
         }
         return false;
     }
-
+    /**
+     * Logs out the current user.
+     */
     // 用户注销
     public void logout() {
         currentUser = null;
     }
-
+    /**
+     * Gets the currently logged-in user.
+     * @return UserModel instance or null if not logged in
+     */
     // 获取当前用户
     public UserModel getCurrentUser() {
         return currentUser;
     }
-
+    /**
+     * Checks if a user is currently logged in.
+     * @return True if logged in, false otherwise
+     */
     // 检查是否已登录
     public boolean isLoggedIn() {
         return currentUser != null;
     }
-
+    /**
+     * Gets the current user's username.
+     * @return Username string or null if not logged in
+     */
     // 获取用户名
     public String getCurrentUserUsername() {
         return currentUser != null ? currentUser.getUsername() : null;
     }
-
+    /**
+     * Gets the file path for the current user's finance data.
+     * @return Path to user's finance CSV file (e.g., "user_finance_data/username_finance.csv")
+     */
     // 获取当前用户的财务文件路径
     public String getCurrentUserFinanceFilePath() {
         if (currentUser == null) {
@@ -166,7 +201,12 @@ public class UserControllerImpl {
         }
         return SettingControllerImpl.getFinanceFilePath(currentUser.getUsername());
     }
-
+    /**
+     * Updates a user's password (auto-encrypted via MD5).
+     * @param username User identifier
+     * @param newPassword New clear-text password
+     * @return True if update succeeds, false if user not found
+     */
     // 修改用户密码
     public boolean updateUserPassword(String username, String newPassword) {
         for (UserModel user : users) {
@@ -178,7 +218,12 @@ public class UserControllerImpl {
         }
         return false;
     }
-
+    /**
+     * Updates a user's gender.
+     * @param username User identifier
+     * @param newGender New gender value
+     * @return True if update succeeds, false if user not found
+     */
     // 修改用户性别
     public boolean updateUserGender(String username, boolean newGender) {
         for (UserModel user : users) {
@@ -190,7 +235,12 @@ public class UserControllerImpl {
         }
         return false;
     }
-
+    /**
+     * Updates a user's age.
+     * @param username User identifier
+     * @param newAge New age value
+     * @return True if update succeeds, false if user not found
+     */
     // 修改用户年龄
     public boolean updateUserAge(String username, int newAge) {
         for (UserModel user : users) {
@@ -202,7 +252,11 @@ public class UserControllerImpl {
         }
         return false;
     }
-
+    /**
+     * Deletes a user by username and removes their finance file.
+     * @param username User identifier to delete
+     * @return True if deletion succeeds, false if user not found
+     */
     // 删除指定用户名的用户
     public boolean deleteUser(String username) {
         boolean removed = users.removeIf(user -> user.getUsername().equals(username));

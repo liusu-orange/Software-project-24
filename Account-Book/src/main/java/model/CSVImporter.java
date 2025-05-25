@@ -5,7 +5,13 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-
+/**
+ * CSV importer for parsing financial data into Entry objects.
+ *
+ * @author Minghao Sun
+ * @version 1.0.0
+ * @since v1.0.0
+ */
 public class CSVImporter {
     public List<Entry> importCSV(String filePath) {
         List<Entry> entries = new ArrayList<>();

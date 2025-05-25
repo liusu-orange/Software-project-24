@@ -17,7 +17,11 @@ import java.util.Map;
 import java.util.stream.IntStream;
 
 /**
- * 记账本界面实现类，负责用户界面构建和交互逻辑
+ * Implementation of the account book user interface, responsible for UI construction and interaction logic.
+ *
+ * @author Guanren Huang
+ * @version 1.1.0
+ * @since v1.0.0
  */
 public class AccountBookUiImpl {
     private JPanel contentPanel;
@@ -35,8 +39,9 @@ public class AccountBookUiImpl {
     private JComboBox<Integer> endYearCombo, endMonthCombo, endDayCombo;
 
     /**
-     * 构造函数初始化核心组件
-     * @param contentPanel 父容器面板
+     * Initializes the UI with the main content panel and user controller.
+     * @param contentPanel Parent container panel for UI components
+     * @param userController User controller instance for authentication
      */
     public AccountBookUiImpl(JPanel contentPanel, UserControllerImpl userController) {
         this.contentPanel = contentPanel;
@@ -46,7 +51,7 @@ public class AccountBookUiImpl {
     }
 
     /**
-     * 创建主界面窗口，包含控制面板和结果展示区域
+     * Constructs the main account book window with control panel and result display area.
      */
     public void AccountBookWindow() {
         contentPanel.removeAll();
@@ -63,8 +68,8 @@ public class AccountBookUiImpl {
     }
 
     /**
-     * 创建包含日期选择器和搜索按钮的控制面板
-     * @return 组装完成的面板组件
+     * Creates a control panel with date selectors and a search button.
+     * @return Configured control panel component
      */
     private JPanel createControlPanel() {
         JPanel panel = new JPanel(new GridBagLayout());
@@ -99,9 +104,9 @@ public class AccountBookUiImpl {
     }
 
     /**
-     * 创建日期选择器面板（支持动态日期更新）
-     * @param isStartDate 标识是否为起始日期选择器
-     * @return 包含年月日选择的下拉面板
+     * Creates a date selector panel (start/end date).
+     * @param isStartDate True for start date selector, false for end date
+     * @return Panel with year/month/day combo boxes
      */
     private JPanel createDateSelectorPanel(boolean isStartDate) {
         JPanel panel = new JPanel(new FlowLayout(FlowLayout.LEFT, 5, 0));
@@ -157,10 +162,10 @@ public class AccountBookUiImpl {
     }
 
     /**
-     * 更新日期下拉框的天数（根据年月动态调整）
-     * @param dayCombo 目标下拉框组件
-     * @param year 当前选择的年份
-     * @param month 当前选择的月份（1-12）
+     * Updates the day combo box based on selected year and month.
+     * @param dayCombo Day selection combo box
+     * @param year Selected year
+     * @param month Selected month (1-12)
      */
     private void updateDayCombo(JComboBox<Integer> dayCombo, int year, int month) {
         dayCombo.removeAllItems();
@@ -174,9 +179,9 @@ public class AccountBookUiImpl {
     }
 
     /**
-     * 获取格式化日期字符串（智能识别起始/结束日期组件）
-     * @param isStart 日期类型标识 (Date type flag)
-     * @return 标准化的日期字符串（格式：yyyy-MM-dd）
+     * Retrieves the selected date as a formatted string (yyyy-MM-dd).
+     * @param isStart True for start date, false for end date
+     * @return Formatted date string
      */
     private String getSelectedDate(boolean isStart) {
         int year = isStart ? (Integer)startYearCombo.getSelectedItem()
@@ -189,13 +194,6 @@ public class AccountBookUiImpl {
         return String.format("%04d-%02d-%02d", year, month, day);
     }
 
-    /**
-     * 设置日期选择器组件值
-     * @param yearCombo 年份下拉框
-     * @param monthCombo 月份下拉框
-     * @param dayCombo 日期下拉框
-     * @param date 要设置的日期对象
-     */
     private void setDateComponents(JComboBox<Integer> yearCombo,
                                    JComboBox<Integer> monthCombo,
                                    JComboBox<Integer> dayCombo,
@@ -210,9 +208,9 @@ public class AccountBookUiImpl {
     }
 
     /**
-     * 处理搜索操作（包含异常处理）
-     * @param startInput 起始日期字符串（yyyy-MM-dd）
-     * @param endInput 结束日期字符串（yyyy-MM-dd）
+     * Handles the search operation with date range validation.
+     * @param startInput Start date string (yyyy-MM-dd)
+     * @param endInput End date string (yyyy-MM-dd)
      */
     private void handleSearch(String startInput, String endInput) {
         try {
@@ -236,8 +234,8 @@ public class AccountBookUiImpl {
     }
 
     /**
-     * 更新结果展示面板（含数据空状态处理）
-     * @param data 过滤后的数据集
+     * Updates the result panel with filtered financial records.
+     * @param data Filtered records grouped by date
      */
     private void updateResultPanel(Map<Date, List<AccountBookControllerImpl.Record>> data) {
         resultPanel.removeAll();
@@ -260,10 +258,10 @@ public class AccountBookUiImpl {
     }
 
     /**
-     * 创建带日期标题的记录展示面板
-     * @param date 面板对应的日期
-     * @param records 当日的消费记录列表
-     * @return 组装完成的日期面板
+     * Creates a date-specific panel to display daily records.
+     * @param date Date of the records
+     * @param records List of records for the date
+     * @return Configured date panel component
      */
     private JPanel createDatePanel(Date date, List<AccountBookControllerImpl.Record> records) {
         JPanel panel = new JPanel(new BorderLayout(5, 5));
@@ -326,9 +324,9 @@ public class AccountBookUiImpl {
     }
 
     /**
-     * 创建智能表格（支持列宽自适应和自动换行）
-     * @param records 要展示的记录数据
-     * @return 配置完成的表格组件
+     * Creates a table with auto-adjustable columns for record display.
+     * @param records List of records to populate the table
+     * @return Configured JTable component
      */
     private JTable createSmartTable(List<AccountBookControllerImpl.Record> records) {
         DefaultTableModel model = new DefaultTableModel(
@@ -408,7 +406,7 @@ public class AccountBookUiImpl {
     }
 
     /**
-     * 自动加载初始数据（默认当月数据）
+     * Automatically loads initial data for the current month.
      */
     private void autoLoadInitialData() {
         try {
@@ -441,8 +439,8 @@ public class AccountBookUiImpl {
     }
 
     /**
-     * 更新总额显示面板（新增）
-     * @param total 计算得到的总金额
+     *Update total display panel (New)
+     *@param total calculated total amount
      */
     private void updateTotalDisplay(double total) {
         String formattedTotal = String.format("¥%.2f", total);
@@ -458,9 +456,9 @@ public class AccountBookUiImpl {
     }
 
     /**
-     * 创建当日总计标签（新增）
-     * @param records 当日记录列表
-     * @return 带样式的JLabel组件
+     *Create day total label (New)
+     *@param records list of current day records
+     *@return jLabel component with style
      */
     private JLabel createTotalLabel(List<AccountBookControllerImpl.Record> records) {
         double total = records.stream()
@@ -477,7 +475,10 @@ public class AccountBookUiImpl {
         return label;
     }
 
-
+    /**
+     * Displays an error message dialog.
+     * @param message Error message content
+     */
     private void showError(String message) {
         JOptionPane.showMessageDialog(contentPanel, message,
                 "System prompt", JOptionPane.ERROR_MESSAGE);

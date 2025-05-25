@@ -184,7 +184,7 @@ public class AccountBookUiImpl implements AccountBookUi{
      * @param isStart True for start date, false for end date
      * @return Formatted date string
      */
-    private String getSelectedDate(boolean isStart) {
+    public String getSelectedDate(boolean isStart) {
         int year = isStart ? (Integer)startYearCombo.getSelectedItem()
                 : (Integer)endYearCombo.getSelectedItem();
         int month = isStart ? (Integer)startMonthCombo.getSelectedItem()
@@ -485,7 +485,7 @@ public class AccountBookUiImpl implements AccountBookUi{
                 "System prompt", JOptionPane.ERROR_MESSAGE);
     }
 
-    private void initializeDateFormat() {
+    public void initializeDateFormat() {
         controller.initializeDateFormat();
     }
 }

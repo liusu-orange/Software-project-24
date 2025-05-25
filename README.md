@@ -25,7 +25,7 @@ The personal account book application developed based on Java and designed with 
 | **view**           | User interface implementation       |
 | **resources**      | Static resources and configuration files|
 
-### 📝 配置文件说明
+### 📝 Configuration file description
 - `config.properties`:Contains the default account file storage path
 - `testUser_finance.csv`:Test the CSV data of the user (fields: date, category, amount, remarks)
 

@@ -12,7 +12,8 @@ The personal account book application developed based on Java and designed with 
 - ⚙️ Account Settings (password, gender, age)
 
 ## Project structure
-![屏幕截图 2025-05-25 194245](https://github.com/user-attachments/assets/2b0e05ee-4687-46a2-b5ca-51f166f8da46)
+![image](https://github.com/user-attachments/assets/c899b5b9-e986-4846-8201-66f88b37bb93)
+
 
 ### 🗂 Core Module Description
 

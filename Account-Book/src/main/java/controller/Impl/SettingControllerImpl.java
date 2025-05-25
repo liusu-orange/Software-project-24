@@ -1,12 +1,11 @@
 package controller.Impl;
 
-import controller.SettingController;
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
 import java.util.Properties;
 
-public class SettingControllerImpl implements SettingController {
+public class SettingControllerImpl {
     private static final String CONFIG_DIR = "config";
     private static final String CONFIG_FILE = CONFIG_DIR + File.separator + "config.properties";
     private static final String FINANCE_FILE_DIR_KEY = "finance_file_directory";

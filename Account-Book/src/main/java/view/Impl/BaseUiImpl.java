@@ -103,46 +103,57 @@ private void showLoginView() {
     gbc.fill = GridBagConstraints.CENTER;
     JButton loginButton = new JButton("Log in");
     loginButton.addActionListener(e -> {
-        String username = usernameField.getText();
-        String password = new String(passwordField.getPassword());
+        String username = usernameField.getText().trim();
+        String password = new String(passwordField.getPassword()).trim();
+
+        // Validate input
+        if (username.isEmpty() || password.isEmpty()) {
+            JOptionPane.showMessageDialog(null,
+                    "Username and password cannot be empty",
+                    "Login Error",
+                    JOptionPane.ERROR_MESSAGE);
+            return;
+        }
 
         if (userController.login(username, password)) {
-    userStatusLabel.setText("Logged in: " + username);
-    contentPanel.removeAll();
+            userStatusLabel.setText("Logged in: " + username);
+            contentPanel.removeAll();
 
-// 加载并缩放图片（使用 SCALE_AREA_AVERAGING 提高质量）
-    Image image1 = imageIcon.getImage().getScaledInstance(260, 100, Image.SCALE_AREA_AVERAGING);
-    JLabel imageLabel = new JLabel(new ImageIcon(image1));
+            // 加载并缩放图片（使用 SCALE_AREA_AVERAGING 提高质量）
+            Image image1 = imageIcon.getImage().getScaledInstance(260, 100, Image.SCALE_AREA_AVERAGING);
+            JLabel imageLabel = new JLabel(new ImageIcon(image1));
 
 
 // 创建欢迎文字
-    JLabel textLabel = new JLabel("Welcome to use the accounting book system");
-    textLabel.setFont(new Font("微软雅黑", Font.BOLD, 18));
-    textLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
+            JLabel textLabel = new JLabel("Welcome to use the accounting book system");
+            textLabel.setFont(new Font("微软雅黑", Font.BOLD, 18));
+            textLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
 
 // 创建垂直排列的容器
-    JPanel panel = new JPanel();
-    panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
-    panel.setOpaque(false);
-    panel.setAlignmentX(Component.CENTER_ALIGNMENT);
+            JPanel panel = new JPanel();
+            panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
+            panel.setOpaque(false);
+            panel.setAlignmentX(Component.CENTER_ALIGNMENT);
 
-    // 添加图片和文字
-    imageLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
-    panel.add(imageLabel);
-    panel.add(Box.createVerticalStrut(10)); // 图片和文字间距
-    panel.add(textLabel);
+            // 添加图片和文字
+            imageLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
+            panel.add(imageLabel);
+            panel.add(Box.createVerticalStrut(10)); // 图片和文字间距
+            panel.add(textLabel);
 
-    // 用外层容器让整体居中
-    JPanel wrapper = new JPanel(new GridBagLayout());
-    wrapper.add(panel);
+            // 用外层容器让整体居中
+            JPanel wrapper = new JPanel(new GridBagLayout());
+            wrapper.add(panel);
 
-    contentPanel.add(wrapper, BorderLayout.CENTER);
-    contentPanel.revalidate();
-    contentPanel.repaint();
-
+            contentPanel.add(wrapper, BorderLayout.CENTER);
+            contentPanel.revalidate();
+            contentPanel.repaint();
 
         } else {
-            JOptionPane.showMessageDialog(frame, "The username or password is incorrect", "Login failed", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(null,
+                    "Invalid username or password",
+                    "Login Failed",
+                    JOptionPane.ERROR_MESSAGE);
         }
     });
     loginPanel.add(loginButton, gbc);

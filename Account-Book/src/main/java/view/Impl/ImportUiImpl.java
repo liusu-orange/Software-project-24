@@ -11,6 +11,13 @@ import java.awt.*;
 import java.awt.event.ActionListener;
 import java.util.List;
 
+/**
+ * UI implementation for importing/exporting financial data and managing entries in a table.
+ *
+ * @author Guanren Huang Yi Zhong
+ * @version 1.2.0
+ * @since v1.0.0
+ */
 public class ImportUiImpl implements ImportUi {
     private JPanel contentPanel;
     private JTable table;
@@ -20,6 +27,11 @@ public class ImportUiImpl implements ImportUi {
     private ImportControllerImpl controller;
     private UserControllerImpl userController;
 
+    /**
+     * Initializes the import UI with user controller and data model.
+     * @param contentPanel Parent container panel
+     * @param userController User controller instance for authentication
+     */
     public ImportUiImpl(JPanel contentPanel, UserControllerImpl userController) {
         this.contentPanel = contentPanel;
         this.userController = userController; // 初始化UserController
@@ -27,29 +39,6 @@ public class ImportUiImpl implements ImportUi {
         initializeModel();
     }
 
-//    private void initializeModel() {
-//        if (sharedModel == null) {
-//            sharedModel = new DefaultTableModel(new Object[]{"Date", "Amount", "Category", "Description"}, 0) {
-//                @Override
-//                public Class<?> getColumnClass(int column) {
-//                    return column == 1 ? Double.class : String.class;
-//                }
-//            };
-//
-//            // 添加空行保护逻辑
-//            List<Entry> initialData = controller.loadEntries();
-//            if (!initialData.isEmpty()) {
-//                for (Entry e : initialData) {
-//                    sharedModel.addRow(new Object[]{e.getDate(), e.getAmount(),
-//                            e.getCategory(), e.getDescription()});
-//                }
-//            } else {
-//                // 添加默认空行防止异常
-//                sharedModel.addRow(new Object[]{"", 0, "", ""});
-//            }
-//        }
-//        this.model = sharedModel;
-//    }
 private void initializeModel() {
     if (sharedModel == null) {
         sharedModel = new DefaultTableModel(new Object[]{"Date", "Amount", "Category", "Description"}, 0) {
@@ -79,6 +68,9 @@ private void initializeModel() {
     this.model = sharedModel;
 }
 
+    /**
+     * Displays the import/export window with data table and input fields.
+     */
     @Override
     public void ImportWindow() {
         contentPanel.removeAll();
@@ -138,7 +130,9 @@ private void initializeModel() {
         contentPanel.add(buttonPanel, BorderLayout.SOUTH);
     }
 
-    // ImportUiImpl.java
+    /**
+     * Saves table changes to CSV automatically when data is updated.
+     */
     public void autoSave() {
         // 增加有效性检查
         if (model.getRowCount() > 0 && hasValidData()) {
@@ -159,7 +153,11 @@ private void initializeModel() {
     }
 
 
-
+    /**
+     * Creates action listeners for import/export and analysis buttons.
+     * @param label Button label to determine action
+     * @return ActionListener for the specified button
+     */
     private ActionListener createActionListener(String label) {
         return e -> {
             try {
@@ -183,6 +181,9 @@ private void initializeModel() {
         };
     }
 
+    /**
+     * Adds a new financial entry from input fields to the table and CSV.
+     */
     private void addEntry() {
         if (validateInput()) {
             Entry entry = new Entry(
@@ -197,6 +198,10 @@ private void initializeModel() {
         }
     }
 
+    /**
+     * Validates input fields before adding a new entry.
+     * @return True if input is valid, false otherwise
+     */
     private boolean validateInput() {
         if (dateField.getText().isEmpty() || amountField.getText().isEmpty()
                 || descriptionField.getText().isEmpty()) {
@@ -212,6 +217,9 @@ private void initializeModel() {
         return true;
     }
 
+    /**
+     * Deletes selected entries from the table and updates the CSV.
+     */
     private void deleteEntry() {
         int selectedRow = table.getSelectedRow();
         if (selectedRow != -1) {
@@ -222,8 +230,11 @@ private void initializeModel() {
         }
     }
 
-    private static DefaultTableModel sharedModel;
+    private DefaultTableModel sharedModel;
 
+    /**
+     * Clears all input fields after adding an entry.
+     */
     private void clearFields() {
         dateField.setText("");
         amountField.setText("");
